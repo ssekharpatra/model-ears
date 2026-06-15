@@ -33,13 +33,18 @@ export const CarouselNav = forwardRef<HTMLDivElement, CarouselNavProps>(
                className="flex items-center text-black hover:opacity-80 transition-opacity no-underline group"
                onClick={(e) => e.preventDefault()}
             >
-               <h3
+               <motion.h3
+                  layout
+                  transition={{ layout: { type: "tween", duration: 0.5, ease: "easeInOut" } }}
                   id="active-model-title"
                   className="text-4xl md:text-[42px] font-medium uppercase font-schein flex items-center tracking-wide"
                >
-                  <span className="mr-4">{firstWord}</span>
+                  <motion.span layout transition={{ layout: { type: "tween", duration: 0.5, ease: "easeInOut" } }} className="mr-4">
+                     {firstWord}
+                  </motion.span>
                   <AnimatePresence mode="popLayout">
                      <motion.span
+                        layout
                         key={suffix}
                         initial={{
                            opacity: 0,
@@ -55,7 +60,9 @@ export const CarouselNav = forwardRef<HTMLDivElement, CarouselNavProps>(
                      </motion.span>
                   </AnimatePresence>
                   {/* Diagonal arrow — appears on hover */}
-                  <svg
+                  <motion.svg
+                     layout
+                     transition={{ layout: { type: "tween", duration: 0.5, ease: "easeInOut" } }}
                      className={`w-8 h-8 md:w-12 md:h-12 ml-2 md:ml-4 text-black transition-opacity duration-300 ${
                         isCenterHovered
                            ? "opacity-100"
@@ -71,8 +78,8 @@ export const CarouselNav = forwardRef<HTMLDivElement, CarouselNavProps>(
                   >
                      <line x1="7" y1="17" x2="17" y2="7" />
                      <polyline points="7 7 17 7 17 17" />
-                  </svg>
-               </h3>
+                  </motion.svg>
+               </motion.h3>
             </a>
 
             {/* Navigation Arrows */}
