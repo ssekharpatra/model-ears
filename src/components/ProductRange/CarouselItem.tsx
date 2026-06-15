@@ -6,18 +6,24 @@ interface CarouselItemProps {
   isActive: boolean;
   position: 'left' | 'center' | 'right';
   onClick: () => void;
+  onMouseMove?: (e: React.MouseEvent) => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 /**
  * CarouselItem — Individual product in the carousel.
- * Active (center): full size, no blur, prominent.
- * Inactive (sides): smaller, blurred, with hover-to-reveal effect.
+ * Active (center): full size, no blur, prominent, with hover gradient.
+ * Inactive (sides): smaller, blurred, with NO hover gradient.
  */
 export function CarouselItem({
   product,
   isActive,
   position,
   onClick,
+  onMouseMove,
+  onMouseEnter,
+  onMouseLeave,
 }: CarouselItemProps) {
   const orderClass =
     position === 'left'
@@ -31,13 +37,16 @@ export function CarouselItem({
       <div
         className={`carousel-item is-active ${orderClass} w-[50%] md:w-[48%] relative z-20 flex flex-col items-center cursor-pointer transition-all duration-500`}
         data-title={product.name}
+        onMouseMove={onMouseMove}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
       >
         <a
           href="#"
           className="relative w-full flex justify-center items-center group/link"
           onClick={(e) => e.preventDefault()}
         >
-          {/* Hover gradient overlay */}
+          {/* Hover gradient overlay (Only on active) */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full aspect-square bg-[radial-gradient(circle,_rgba(246,115,0,0.19)_0%,_transparent_50%)] opacity-0 group-hover/link:opacity-100 transition-opacity duration-300 pointer-events-none z-0" />
           <Image
             src={product.image}
@@ -62,8 +71,7 @@ export function CarouselItem({
         className="relative w-full flex justify-center items-center group/link"
         onClick={(e) => e.preventDefault()}
       >
-        {/* Hover gradient overlay */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full aspect-square bg-[radial-gradient(circle,_rgba(246,115,0,0.19)_0%,_transparent_50%)] opacity-0 group-hover/link:opacity-100 transition-opacity duration-300 pointer-events-none z-0" />
+        {/* No hover gradient overlay for inactive items */}
         <Image
           src={product.image}
           alt={product.alt}

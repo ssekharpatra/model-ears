@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
@@ -29,6 +29,9 @@ export function ProductRange() {
 
   const carousel = useCarousel(PRODUCTS);
   const cursorFollower = useCursorFollower();
+  
+  // State to track if the centered active product is being hovered
+  const [isCenterHovered, setIsCenterHovered] = useState(false);
 
   // Scroll-triggered animations using useGSAP (never useEffect)
   useGSAP(
@@ -95,14 +98,21 @@ export function ProductRange() {
           ref={carouselRef}
           carousel={carousel}
           onMouseMove={cursorFollower.handleMouseMove}
-          onMouseEnter={cursorFollower.handleMouseEnter}
-          onMouseLeave={cursorFollower.handleMouseLeave}
+          onMouseEnter={() => {
+            cursorFollower.handleMouseEnter();
+            setIsCenterHovered(true);
+          }}
+          onMouseLeave={() => {
+            cursorFollower.handleMouseLeave();
+            setIsCenterHovered(false);
+          }}
         />
       </div>
 
       <CarouselNav
         ref={carouselNavRef}
         activeModelName={carousel.getVisibleProducts().center.name}
+        isCenterHovered={isCenterHovered}
         onPrev={carousel.goPrev}
         onNext={carousel.goNext}
       />

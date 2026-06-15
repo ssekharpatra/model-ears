@@ -15,7 +15,7 @@ export function CursorFollower({ x, y, isVisible }: CursorFollowerProps) {
   return (
     <div
       id="follower-tooltip"
-      className="fixed top-0 left-0 pointer-events-none z-[100] bg-brand-orange text-white text-[10px] md:text-xs h-7 md:h-8 rounded-full transition-opacity duration-300 font-semibold tracking-wide shadow-md flex items-center overflow-hidden w-28 md:w-36"
+      className="fixed top-0 left-0 pointer-events-none z-[100] bg-brand-orange text-white text-[10px] md:text-xs h-7 md:h-8 rounded-full transition-opacity duration-300 font-semibold tracking-wide shadow-md flex items-center overflow-hidden w-28 md:w-36 uppercase font-schein"
       style={{
         opacity: isVisible ? 1 : 0,
         transform: `translate(${x + 14}px, ${y + 14}px)`,

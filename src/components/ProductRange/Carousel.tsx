@@ -43,9 +43,6 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
         {/* Absolute Carousel Container */}
         <div
           className="absolute inset-0 w-full px-4 md:px-12 pt-16 md:pt-[8rem] pb-8 flex items-center justify-between gap-6 md:gap-[15%]"
-          onMouseMove={(e) => onMouseMove(e.nativeEvent)}
-          onMouseEnter={onMouseEnter}
-          onMouseLeave={onMouseLeave}
         >
           {/* Left Product (Blurred) */}
           <CarouselItem
@@ -61,6 +58,9 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
             isActive={true}
             position="center"
             onClick={() => {}}
+            onMouseMove={(e) => onMouseMove(e.nativeEvent as any)}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
           />
 
           {/* Right Product (Blurred) */}

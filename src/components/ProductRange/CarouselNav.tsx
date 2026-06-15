@@ -3,6 +3,7 @@ import { CarouselButton } from './CarouselButton';
 
 interface CarouselNavProps {
   activeModelName: string;
+  isCenterHovered?: boolean;
   onPrev: () => void;
   onNext: () => void;
 }
@@ -12,7 +13,7 @@ interface CarouselNavProps {
  * Title shows a diagonal arrow on hover. Animated in via GSAP ScrollTrigger.
  */
 export const CarouselNav = forwardRef<HTMLDivElement, CarouselNavProps>(
-  function CarouselNav({ activeModelName, onPrev, onNext }, ref) {
+  function CarouselNav({ activeModelName, isCenterHovered, onPrev, onNext }, ref) {
     return (
       <div
         ref={ref}
@@ -32,7 +33,9 @@ export const CarouselNav = forwardRef<HTMLDivElement, CarouselNavProps>(
             <span>{activeModelName}</span>
             {/* Diagonal arrow — appears on hover */}
             <svg
-              className="w-8 h-8 md:w-12 md:h-12 ml-2 md:ml-4 text-black opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              className={`w-8 h-8 md:w-12 md:h-12 ml-2 md:ml-4 text-black transition-opacity duration-300 ${
+                isCenterHovered ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+              }`}
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
