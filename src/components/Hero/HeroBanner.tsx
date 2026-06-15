@@ -17,10 +17,9 @@ export function HeroBanner() {
    return (
       <div
          id="hero-banner"
-         className="w-full relative flex flex-col z-0 drop-shadow-2xl"
+         className="w-full h-[400px] md:h-[520px] lg:h-[620px] relative flex flex-col z-0 drop-shadow-2xl"
          onMouseMove={handleMouseMove}
          style={{
-            height: "620px",
             background:
                "radial-gradient(circle 800px at var(--mouse-x, 0%) var(--mouse-y, 50%), #2a1508 0%, #101010 70%, #101010 100%)",
             clipPath: `polygon(

@@ -84,6 +84,7 @@ export function CarouselItem({
           alt={product.alt}
           width={400}
           height={400}
+          sizes={isActive ? "(max-width: 768px) 50vw, 48vw" : "(max-width: 768px) 20vw, 15vw"}
           className={`relative z-10 h-auto object-contain drop-shadow-md ${
             isActive ? 'w-[95%] md:w-[90%]' : 'w-full'
           }`}

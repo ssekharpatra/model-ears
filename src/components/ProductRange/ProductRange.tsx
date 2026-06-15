@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
@@ -23,7 +23,8 @@ gsap.registerPlugin(ScrollTrigger);
  */
 export function ProductRange() {
   const sectionRef = useRef<HTMLElement>(null);
-  const ourRangeRef = useRef<HTMLHeadingElement>(null);
+  const carouselWrapperRef = useRef<HTMLDivElement>(null);
+  const ourRangeRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const carouselNavRef = useRef<HTMLDivElement>(null);
 
@@ -33,22 +34,41 @@ export function ProductRange() {
   // State to track if the centered active product is being hovered
   const [isCenterHovered, setIsCenterHovered] = useState(false);
   
-  // State to lock navigation during animation
-  const [isAnimating, setIsAnimating] = useState(false);
+  // Ref-based animation lock — avoids stale setTimeout issues
+  const isAnimatingRef = useRef(false);
 
-  const handlePrev = () => {
-    if (isAnimating) return;
-    setIsAnimating(true);
+  const handlePrev = useCallback(() => {
+    if (isAnimatingRef.current) return;
+    isAnimatingRef.current = true;
     carousel.goPrev();
-    setTimeout(() => setIsAnimating(false), 500);
-  };
+    setTimeout(() => { isAnimatingRef.current = false; }, 500);
+  }, [carousel]);
 
-  const handleNext = () => {
-    if (isAnimating) return;
-    setIsAnimating(true);
+  const handleNext = useCallback(() => {
+    if (isAnimatingRef.current) return;
+    isAnimatingRef.current = true;
     carousel.goNext();
-    setTimeout(() => setIsAnimating(false), 500);
-  };
+    setTimeout(() => { isAnimatingRef.current = false; }, 500);
+  }, [carousel]);
+
+  // Keyboard arrow key navigation for the carousel
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handlePrev();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleNext();
+      }
+    };
+
+    section.addEventListener('keydown', handleKeyDown);
+    return () => section.removeEventListener('keydown', handleKeyDown);
+  }, [handlePrev, handleNext]);
 
   // Scroll-triggered animations using useGSAP (never useEffect)
   useGSAP(
@@ -67,34 +87,34 @@ export function ProductRange() {
         return;
       }
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          ...SCROLL_TRIGGER_DEFAULTS,
-        },
-      });
-
-      // 1. "OUR RANGE" text slides up
-      tl.fromTo(
+      // 1. "OUR RANGE" background text rises majestically when it enters the viewport
+      gsap.fromTo(
         ourRangeRef.current,
         ANIM_PRESETS.fadeInUp.from,
-        ANIM_PRESETS.fadeInUp.to
+        { 
+          ...ANIM_PRESETS.fadeInUp.to,
+          scrollTrigger: {
+            trigger: carouselWrapperRef.current,
+            ...SCROLL_TRIGGER_DEFAULTS,
+          }
+        }
       );
 
-      // 2. Carousel container slides up (staggered)
-      tl.fromTo(
-        carouselRef.current,
-        ANIM_PRESETS.fadeInUp.from,
-        ANIM_PRESETS.fadeInUp.to,
-        '-=0.7'
-      );
-
-      // 3. Carousel nav slides up (smaller distance)
-      tl.fromTo(
-        carouselNavRef.current,
-        ANIM_PRESETS.fadeInUpSmall.from,
-        ANIM_PRESETS.fadeInUpSmall.to,
-        '-=0.5'
+      // 2. All products and Navigation Title glide up together when scrolled deeper
+      const act2Tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: carouselWrapperRef.current,
+          start: 'top 50%',
+          toggleActions: SCROLL_TRIGGER_DEFAULTS.toggleActions,
+        }
+      });
+      
+      act2Tl.fromTo(carouselRef.current, 
+        ANIM_PRESETS.fadeInUpSmall.from, 
+        { ...ANIM_PRESETS.fadeInUpSmall.to, duration: 1 }, 0)
+      .fromTo(carouselNavRef.current, 
+        { opacity: 0, y: 50 }, 
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' }, 0.2
       );
     },
     { scope: sectionRef }
@@ -104,11 +124,13 @@ export function ProductRange() {
     <section
       ref={sectionRef}
       id="product-range-section"
-      className="w-full max-w-[1400px] mx-auto overflow-hidden relative flex flex-col items-center bg-white pt-6 md:pt-12"
+      aria-label="Product Range"
+      tabIndex={-1}
+      className="w-full max-w-[1400px] mx-auto overflow-hidden relative flex flex-col items-center bg-white pt-6 md:pt-12 outline-none"
     >
       <ProductDescription />
 
-      <div className="relative w-full flex flex-col items-center mt-8 md:mt-12">
+      <div ref={carouselWrapperRef} className="relative w-full flex flex-col items-center mt-8 md:mt-12">
         <OurRangeText ref={ourRangeRef} />
 
         <Carousel
@@ -144,3 +166,4 @@ export function ProductRange() {
     </section>
   );
 }
+

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 
 /**
  * Custom hook to track mouse position on an element
@@ -9,6 +9,15 @@ import { useCallback, useRef } from 'react';
  */
 export function useMousePosition() {
   const rafId = useRef<number | null>(null);
+
+  // Cleanup pending rAF on unmount
+  useEffect(() => {
+    return () => {
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+      }
+    };
+  }, []);
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {

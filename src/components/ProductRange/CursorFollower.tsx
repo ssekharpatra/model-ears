@@ -19,6 +19,7 @@ export function CursorFollower({ x, y, isVisible }: CursorFollowerProps) {
       style={{
         opacity: isVisible ? 1 : 0,
         transform: `translate(${x + 14}px, ${y + 14}px)`,
+        willChange: 'transform, opacity',
       }}
     >
       <div className="flex whitespace-nowrap w-max animate-marquee-lr items-center">

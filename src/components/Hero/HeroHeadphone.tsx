@@ -51,13 +51,14 @@ export function HeroHeadphone() {
       className="absolute inset-0 w-full top-[15px] h-[652px] pointer-events-none flex justify-center items-center z-10 overflow-visible"
     >
       <div id="hero-headphone-wrapper" className="absolute inset-0 w-full h-full">
-        <div ref={imageWrapperRef} className="w-full h-full relative">
+        <div ref={imageWrapperRef} className="w-full h-full relative will-change-transform">
           <Image
             src="/assets/images/hero/hero-headphone.webp"
             alt="Model XRS Headphone"
             width={1143}
             height={803}
             priority
+            sizes="(max-width: 1024px) 75vw, 50vw"
             className="absolute top-1/2 left-1/2
               -translate-x-[60%]
               -translate-y-[48%]

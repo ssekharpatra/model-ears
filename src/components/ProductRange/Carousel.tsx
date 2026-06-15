@@ -38,6 +38,8 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
               aria-hidden="true"
               width={359}
               height={359}
+              loading="lazy"
+              sizes="(max-width: 768px) 50vw, 48vw"
               className="w-[95%] md:w-[90%] h-auto object-contain"
             />
           </div>
@@ -59,7 +61,7 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
                 product={product}
                 isActive={isActive}
                 onClick={onClick}
-                onMouseMove={isActive ? (e) => onMouseMove(e.nativeEvent as any) : undefined}
+                onMouseMove={isActive ? (e: React.MouseEvent) => onMouseMove(e.nativeEvent as MouseEvent) : undefined}
                 onMouseEnter={isActive ? onMouseEnter : undefined}
                 onMouseLeave={isActive ? onMouseLeave : undefined}
               />
@@ -70,3 +72,4 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
     );
   }
 );
+
