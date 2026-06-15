@@ -32,6 +32,23 @@ export function ProductRange() {
   
   // State to track if the centered active product is being hovered
   const [isCenterHovered, setIsCenterHovered] = useState(false);
+  
+  // State to lock navigation during animation
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const handlePrev = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    carousel.goPrev();
+    setTimeout(() => setIsAnimating(false), 500);
+  };
+
+  const handleNext = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    carousel.goNext();
+    setTimeout(() => setIsAnimating(false), 500);
+  };
 
   // Scroll-triggered animations using useGSAP (never useEffect)
   useGSAP(
@@ -97,6 +114,8 @@ export function ProductRange() {
         <Carousel
           ref={carouselRef}
           carousel={carousel}
+          onPrev={handlePrev}
+          onNext={handleNext}
           onMouseMove={cursorFollower.handleMouseMove}
           onMouseEnter={() => {
             cursorFollower.handleMouseEnter();
@@ -113,8 +132,8 @@ export function ProductRange() {
         ref={carouselNavRef}
         activeModelName={carousel.getVisibleProducts().center.name}
         isCenterHovered={isCenterHovered}
-        onPrev={carousel.goPrev}
-        onNext={carousel.goNext}
+        onPrev={handlePrev}
+        onNext={handleNext}
       />
 
       <CursorFollower

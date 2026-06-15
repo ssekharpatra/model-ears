@@ -1,10 +1,13 @@
 import { forwardRef } from 'react';
 import Image from 'next/image';
+import { AnimatePresence } from 'framer-motion';
 import { CarouselItem } from './CarouselItem';
 import { useCarousel } from '@/hooks/useCarousel';
 
 interface CarouselProps {
   carousel: ReturnType<typeof useCarousel>;
+  onPrev: () => void;
+  onNext: () => void;
   onMouseMove: (e: MouseEvent) => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
@@ -16,8 +19,8 @@ interface CarouselProps {
  * Supports click navigation on side items + prev/next buttons.
  */
 export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
-  function Carousel({ carousel, onMouseMove, onMouseEnter, onMouseLeave }, ref) {
-    const { getVisibleProducts, goPrev, goNext } = carousel;
+  function Carousel({ carousel, onPrev, onNext, onMouseMove, onMouseEnter, onMouseLeave }, ref) {
+    const { getVisibleProducts } = carousel;
     const visible = getVisibleProducts();
 
     return (
@@ -43,33 +46,25 @@ export const Carousel = forwardRef<HTMLDivElement, CarouselProps>(
         {/* Absolute Carousel Container */}
         <div
           className="absolute inset-0 w-full px-4 md:px-12 pt-16 md:pt-[8rem] pb-8 flex items-center justify-between gap-6 md:gap-[15%]"
+          aria-live="polite"
         >
-          {/* Left Product (Blurred) */}
-          <CarouselItem
-            product={visible.left}
-            isActive={false}
-            position="left"
-            onClick={goPrev}
-          />
-
-          {/* Center Product (Active) */}
-          <CarouselItem
-            product={visible.center}
-            isActive={true}
-            position="center"
-            onClick={() => {}}
-            onMouseMove={(e) => onMouseMove(e.nativeEvent as any)}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
-          />
-
-          {/* Right Product (Blurred) */}
-          <CarouselItem
-            product={visible.right}
-            isActive={false}
-            position="right"
-            onClick={goNext}
-          />
+          <AnimatePresence initial={false}>
+            {[
+              { product: visible.left, isActive: false, onClick: onPrev },
+              { product: visible.center, isActive: true, onClick: () => {} },
+              { product: visible.right, isActive: false, onClick: onNext }
+            ].map(({ product, isActive, onClick }) => (
+              <CarouselItem
+                key={product.id}
+                product={product}
+                isActive={isActive}
+                onClick={onClick}
+                onMouseMove={isActive ? (e) => onMouseMove(e.nativeEvent as any) : undefined}
+                onMouseEnter={isActive ? onMouseEnter : undefined}
+                onMouseLeave={isActive ? onMouseLeave : undefined}
+              />
+            ))}
+          </AnimatePresence>
         </div>
       </div>
     );
