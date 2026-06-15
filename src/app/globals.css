@@ -16,7 +16,7 @@
    --font-saira: var(--font-saira), ui-sans-serif, system-ui, sans-serif;
 
    /* Custom animation */
-   --animate-marquee-lr: marquee-lr 8s linear infinite;
+   --animate-marquee-lr: marquee-lr 4s linear infinite;
 }
 
 /* ===== Keyframes ===== */

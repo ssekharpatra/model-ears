@@ -6,12 +6,6 @@ import { Product } from '@/types';
  */
 export const PRODUCTS: Product[] = [
   {
-    id: 'model-ssr',
-    name: 'MODEL SSR',
-    image: '/assets/images/headphones/model-ssr.webp',
-    alt: 'Model SSR wireless headphones in dark gray',
-  },
-  {
     id: 'model-sky',
     name: 'MODEL SKY',
     image: '/assets/images/headphones/model-sky.webp',
@@ -22,6 +16,12 @@ export const PRODUCTS: Product[] = [
     name: 'MODEL XRS',
     image: '/assets/images/headphones/model-xrs.webp',
     alt: 'Model XRS premium headphones with chrome accents',
+  },
+  {
+    id: 'model-ssr',
+    name: 'MODEL SSR',
+    image: '/assets/images/headphones/model-ssr.webp',
+    alt: 'Model SSR wireless headphones in dark gray',
   },
 ];
 
