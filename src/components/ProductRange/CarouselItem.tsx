@@ -51,8 +51,8 @@ export function CarouselItem({
       }}
       className={`carousel-item relative flex flex-col items-center ${
         isActive 
-          ? 'z-20 cursor-default is-active w-[50%] md:w-[48%]' 
-          : 'cursor-pointer w-[20%] md:w-[15%]'
+          ? 'z-20 cursor-default is-active w-[55%] sm:w-[50%] md:w-[48%]' 
+          : 'cursor-pointer w-[18%] sm:w-[20%] md:w-[15%]'
       }`}
       data-title={product.name}
       onClick={!isActive ? onClick : undefined}

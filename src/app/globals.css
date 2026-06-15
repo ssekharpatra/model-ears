@@ -35,6 +35,30 @@ html {
    scroll-behavior: smooth;
 }
 
+@utility hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Responsive clip-path corners — smaller on mobile */
+@media (max-width: 767px) {
+  #hero-banner {
+    clip-path: polygon(
+      12px 0,
+      calc(100% - 12px) 0,
+      100% 12px,
+      100% calc(100% - 12px),
+      calc(100% - 12px) 100%,
+      12px 100%,
+      0 calc(100% - 12px),
+      0 12px
+    ) !important;
+  }
+}
+
 body {
    background: #ffffff;
    color: #000000;

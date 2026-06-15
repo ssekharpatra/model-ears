@@ -7,7 +7,7 @@ import { HeroHeadphone } from "./HeroHeadphone";
  */
 export function Hero() {
    return (
-      <section className="w-[96%] max-w-[1920px] mx-auto pt-3 md:pt-4 relative mb-8 md:mb-12 flex flex-col items-center">
+      <section className="w-[96%] max-w-[1920px] mx-auto pt-3 md:pt-4 relative mb-8 md:mb-12 flex flex-col items-center overflow-hidden lg:overflow-visible">
          <HeroBanner />
          <HeroHeadphone />
       </section>

@@ -37,7 +37,7 @@ export const CarouselNav = forwardRef<HTMLDivElement, CarouselNavProps>(
                   layout
                   transition={{ layout: { type: "tween", duration: 0.5, ease: "easeInOut" } }}
                   id="active-model-title"
-                  className="text-4xl md:text-[42px] font-medium uppercase font-schein flex items-center tracking-wide"
+                  className="text-2xl sm:text-4xl md:text-[42px] font-medium uppercase font-schein flex items-center tracking-wide"
                >
                   <motion.span layout transition={{ layout: { type: "tween", duration: 0.5, ease: "easeInOut" } }} className="mr-4">
                      {firstWord}
@@ -63,7 +63,7 @@ export const CarouselNav = forwardRef<HTMLDivElement, CarouselNavProps>(
                   <motion.svg
                      layout
                      transition={{ layout: { type: "tween", duration: 0.5, ease: "easeInOut" } }}
-                     className={`w-8 h-8 md:w-12 md:h-12 ml-2 md:ml-4 text-black transition-opacity duration-300 ${
+                     className={`w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 ml-1 sm:ml-2 md:ml-4 text-black transition-opacity duration-300 ${
                         isCenterHovered
                            ? "opacity-100"
                            : "opacity-0 group-hover:opacity-100"

@@ -17,6 +17,10 @@ export function HeroHeadphone() {
 
   useGSAP(
     () => {
+      // Skip parallax on touch devices
+      const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+      if (isTouchDevice) return;
+
       // Create quick setters for performance
       const xTo = gsap.quickTo(imageWrapperRef.current, 'x', { duration: 0.6, ease: 'power3' });
       const yTo = gsap.quickTo(imageWrapperRef.current, 'y', { duration: 0.6, ease: 'power3' });
@@ -48,7 +52,7 @@ export function HeroHeadphone() {
   return (
     <div
       ref={containerRef}
-      className="absolute inset-0 w-full top-[15px] h-[652px] pointer-events-none flex justify-center items-center z-10 overflow-visible"
+      className="absolute inset-0 w-full top-[15px] h-[420px] md:h-[540px] lg:h-[652px] pointer-events-none flex justify-center items-center z-10 overflow-visible"
     >
       <div id="hero-headphone-wrapper" className="absolute inset-0 w-full h-full">
         <div ref={imageWrapperRef} className="w-full h-full relative will-change-transform">
@@ -60,9 +64,9 @@ export function HeroHeadphone() {
             priority
             sizes="(max-width: 1024px) 75vw, 50vw"
             className="absolute top-1/2 left-1/2
-              -translate-x-[60%]
-              -translate-y-[48%]
-              h-[75%] lg:h-[125%]
+              -translate-x-[50%] md:-translate-x-[55%] lg:-translate-x-[60%]
+              -translate-y-[50%] md:-translate-y-[48%]
+              h-[70%] md:h-[85%] lg:h-[125%]
               w-auto max-w-none object-contain
               pointer-events-none"
           />
