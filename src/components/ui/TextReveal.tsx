@@ -151,28 +151,30 @@ export function TextReveal({
         return;
       }
 
-      const splitInstance = SplitText.create(el, {
-        type: split === 'words' ? 'words' : 'lines',
-        // SplitText wraps each word/line in a div — mask ensures
-        // slide-up text is clipped to its line box
-        mask: split === 'lines' ? 'lines' : undefined,
-      });
-
-      const targets =
-        split === 'words' ? splitInstance.words : splitInstance.lines;
-
-      // Set container visible now that children are split & hidden
-      gsap.set(el, { opacity: 1 });
-
-      // Pre-set targets to initial state (invisible)
+      let splitInstance: SplitText | null = null;
       const fromVars = getFromVars(variant);
-      gsap.set(targets, fromVars);
 
       const observer = new IntersectionObserver(
         (entries) => {
           const entry = entries[0];
           if (entry && entry.isIntersecting) {
             observer.disconnect();
+
+            splitInstance = SplitText.create(el, {
+              type: split === 'words' ? 'words' : 'lines',
+              // SplitText wraps each word/line in a div — mask ensures
+              // slide-up text is clipped to its line box
+              mask: split === 'lines' ? 'lines' : undefined,
+            });
+
+            const targets =
+              split === 'words' ? splitInstance.words : splitInstance.lines;
+
+            // Pre-set targets to initial state (invisible)
+            gsap.set(targets, fromVars);
+
+            // Set container visible now that children are split & hidden
+            gsap.set(el, { opacity: 1 });
 
             gsap.to(targets, {
               ...Object.fromEntries(
@@ -189,7 +191,7 @@ export function TextReveal({
               stagger: resolvedStagger,
               onComplete: () => {
                 // Clean up — restore original DOM and clear inline styles
-                splitInstance.revert();
+                splitInstance?.revert();
                 gsap.set(el, { clearProps: 'opacity' });
                 onRevealComplete?.();
               },
@@ -206,7 +208,7 @@ export function TextReveal({
 
       return () => {
         observer.disconnect();
-        splitInstance.revert();
+        splitInstance?.revert();
       };
     },
     { scope: containerRef, dependencies: [] },

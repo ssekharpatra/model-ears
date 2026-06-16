@@ -62,6 +62,7 @@ export function CarouselItem({
       tabIndex={0}
       onKeyDown={handleKeyDown}
       aria-current={isActive ? "true" : "false"}
+      aria-label={product.name}
     >
       <a
         href="#"
