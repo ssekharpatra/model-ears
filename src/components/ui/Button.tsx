@@ -17,8 +17,8 @@ export function Button({ children, onClick, className = "" }: ButtonProps) {
         bg-brand-orange hover:bg-brand-orange
         rounded-3xl text-white px-8 py-3
         text-xs font-medium tracking-wider whitespace-nowrap
-        transition-all duration-300
-        hover:shadow-[0_0_26px_#f67300]
+        transition-shadow duration-300 ease-in-out
+        shadow-brand-glow-none hover:shadow-brand-glow
         active:scale-95
         font-saira
         cursor-pointer

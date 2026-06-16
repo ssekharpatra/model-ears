@@ -16,6 +16,7 @@ import {
    SPEC_INTRO_MOBILE,
    type SpecCallout,
 } from "@/lib/specs";
+import { TextReveal } from "@/components/ui/TextReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -193,6 +194,24 @@ export function Specifications() {
                      seg + 0.05,
                   );
                });
+               // Secondary spec ledger — staggered fade-in near end of scrub
+               const secondaryItems = gsap.utils.toArray<HTMLElement>(
+                  "[data-spec-secondary]",
+               );
+               if (secondaryItems.length) {
+                  gsap.set(secondaryItems, { opacity: 0, y: 8 });
+                  tl.to(
+                     secondaryItems,
+                     {
+                        opacity: 1,
+                        y: 0,
+                        stagger: 0.06,
+                        duration: 0.1,
+                        ease: "power2.out",
+                     },
+                     0.85,
+                  );
+               }
 
                // Bottom progress bar spans the ENTIRE timeline (position 0 →
                // full duration) so it fills linearly with scroll: 0% as the scrub
@@ -304,19 +323,37 @@ export function Specifications() {
 
                {/* Header */}
                <header className="relative z-20 px-6 pt-8 md:absolute md:top-10 md:left-12 md:p-0 max-w-xl">
-                  <h2 className="font-schein font-bold uppercase leading-[0.92] tracking-[0.005em] text-4xl md:text-5xl lg:text-6xl text-balance">
-                     {SPEC_HEADING_LINE1}
-                     <br />
-                     {SPEC_HEADING_LINE2}
-                  </h2>
-                  {/* Mobile intro — no scroll-animation reference */}
-                  <p className="md:hidden font-roboto text-sm leading-relaxed text-white/60 mt-4 max-w-md text-pretty">
+                  <TextReveal
+                     split="words"
+                     variant="blur"
+                     stagger={0.06}
+                     as="h2"
+                     className="font-schein font-bold uppercase leading-[0.92] tracking-[0.005em] text-4xl md:text-5xl lg:text-6xl text-balance"
+                  >
+                     {SPEC_HEADING_LINE1} {SPEC_HEADING_LINE2}
+                  </TextReveal>
+                  {/* Mobile intro */}
+                  <TextReveal
+                     split="words"
+                     variant="blur"
+                     stagger={0.02}
+                     delay={0.3}
+                     as="p"
+                     className="md:hidden font-roboto text-sm leading-relaxed text-white/60 mt-4 max-w-md text-pretty"
+                  >
                      {SPEC_INTRO_MOBILE}
-                  </p>
+                  </TextReveal>
                   {/* Desktop intro */}
-                  <p className="hidden md:block font-roboto text-base leading-relaxed text-white/60 mt-4 max-w-md text-pretty">
+                  <TextReveal
+                     split="words"
+                     variant="blur"
+                     stagger={0.02}
+                     delay={0.3}
+                     as="p"
+                     className="hidden md:block font-roboto text-base leading-relaxed text-white/60 mt-4 max-w-md text-pretty"
+                  >
                      {SPEC_INTRO}
-                  </p>
+                  </TextReveal>
                </header>
 
                {/* Stage: headphone + schematic overlay */}
@@ -461,7 +498,11 @@ export function Specifications() {
                <div className="relative z-20 mt-8 md:mt-0 md:absolute md:bottom-0 md:inset-x-0 border-t border-white/10 px-6 md:px-12 py-4">
                   <ul className="flex flex-wrap items-center gap-x-6 gap-y-2 md:justify-between">
                      {SPEC_SECONDARY.map((s) => (
-                        <li key={s.label} className="flex items-baseline gap-2">
+                        <li
+                           key={s.label}
+                           data-spec-secondary
+                           className="flex items-baseline gap-2"
+                        >
                            <span className="font-saira text-[10px] uppercase tracking-[0.25em] text-white/40">
                               {s.label}
                            </span>

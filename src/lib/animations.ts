@@ -24,22 +24,8 @@ export const SCROLL_TRIGGER_DEFAULTS = {
 } as const;
 
 /**
- * Framer Motion text-reveal defaults (used by TextReveal component).
- * Centralizes magic numbers for the blur-scale-opacity crossfade.
- */
-export const TEXT_REVEAL_DEFAULTS = {
-  duration: 0.7,
-  ease: 'easeInOut',
-  blurRadius: 12,
-  scaleOffset: 0.05,
-  inViewThreshold: 0.2,
-  inViewMargin: '-80px',
-} as const;
-
-/**
  * Hero entrance sequence delays (seconds from page load).
  * Each act overlaps slightly with the previous for continuous motion.
- * Total sequence: ~2.8s — cinematic but not sluggish.
  */
 export const HERO_ENTRANCE = {
   banner: 0,
@@ -52,4 +38,19 @@ export const HERO_ENTRANCE = {
   button: 1.1,
   headphone: 0.7,
   headphoneDur: 0.9,
+} as const;
+
+/**
+ * GSAP SplitText text-reveal defaults (used by TextReveal component).
+ * Tuned for word-by-word and line-by-line animations.
+ */
+export const TEXT_REVEAL_DEFAULTS = {
+  wordStagger: 0.06,
+  lineStagger: 0.12,
+  duration: 0.8,
+  ease: 'power2.out',
+  blurRadius: 10,
+  slideDistance: 20,
+  inViewThreshold: 0.2,
+  inViewMargin: '-80px',
 } as const;

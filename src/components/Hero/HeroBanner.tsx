@@ -1,10 +1,17 @@
 "use client";
 
-import { forwardRef } from "react";
+import { forwardRef, type RefObject } from "react";
 import { HeroLogo } from "./HeroLogo";
 import { HeroTitle } from "./HeroTitle";
-import { HeroInfo } from "./HeroInfo";
+import { HeroInfo, type HeroInfoHandle } from "./HeroInfo";
 import { useMousePosition } from "@/hooks/useMousePosition";
+
+interface HeroBannerProps {
+   /** Ref forwarded to the HeroLogo container for GSAP targeting */
+   logoRef: RefObject<HTMLDivElement | null>;
+   /** Ref forwarded to HeroInfo for GSAP targeting of price/button */
+   infoRef: RefObject<HeroInfoHandle | null>;
+}
 
 /**
  * HeroBanner — The dark container with:
@@ -15,8 +22,8 @@ import { useMousePosition } from "@/hooks/useMousePosition";
  * Starts hidden (opacity: 0 inline) to prevent FOUC.
  * Parent animates it in via GSAP.
  */
-export const HeroBanner = forwardRef<HTMLDivElement>(
-   function HeroBanner(_, ref) {
+export const HeroBanner = forwardRef<HTMLDivElement, HeroBannerProps>(
+   function HeroBanner({ logoRef, infoRef }, ref) {
       const { handleMouseMove } = useMousePosition();
 
       return (
@@ -42,9 +49,9 @@ export const HeroBanner = forwardRef<HTMLDivElement>(
          )`,
             }}
          >
-            <HeroLogo />
+            <HeroLogo ref={logoRef} />
             <HeroTitle />
-            <HeroInfo />
+            <HeroInfo ref={infoRef} />
          </div>
       );
    },

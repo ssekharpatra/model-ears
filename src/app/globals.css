@@ -18,6 +18,10 @@
 
    /* Custom animation */
    --animate-marquee-lr: marquee-lr 4s linear infinite;
+
+   /* Custom shadows */
+   --shadow-brand-glow: 0 0 26px var(--color-brand-orange);
+   --shadow-brand-glow-none: 0 0 0px rgba(246, 115, 0, 0);
 }
 
 /* ===== Keyframes ===== */

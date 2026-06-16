@@ -1,340 +1,232 @@
 'use client';
 
-import {
-  memo,
-  useRef,
-  useMemo,
-  type ReactNode,
-} from 'react';
-import {
-  AnimatePresence,
-  motion,
-  useInView,
-  useReducedMotion,
-  type Transition,
-  type Easing,
-} from 'framer-motion';
+import { useRef, type ReactNode } from 'react';
+import gsap from 'gsap';
+import { SplitText } from 'gsap/SplitText';
+import { useGSAP } from '@gsap/react';
 import { TEXT_REVEAL_DEFAULTS } from '@/lib/animations';
 
+// Register plugin once at module level
+gsap.registerPlugin(SplitText);
+
 // ─── Types ────────────────────────────────────────────────────
+
+/** Supported HTML tags for the wrapper element. */
+type RevealTag = 'div' | 'p' | 'span' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 
 interface InViewOptions {
   /** Fraction of element visible before triggering (default: 0.2) */
   threshold?: number;
-  /** Root margin — negative values trigger earlier (default: '-80px') */
+  /** Root margin string (default: '-80px') */
   margin?: string;
 }
 
-/** Supported HTML tags for the `as` prop. */
-type RevealTag = 'span' | 'div' | 'p' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
-
 interface TextRevealProps {
-  // ─── Trigger Mode (pick one) ───────────────────────────────
-
-  /** Key-change mode: triggers crossfade animation when this value changes */
-  revealKey?: string | number;
-
-  /**
-   * In-view mode: triggers reveal when element scrolls into viewport.
-   * Pass `true` for defaults, or an options object for fine-tuning.
-   */
-  inView?: boolean | InViewOptions;
-
-  // ─── Animation Config ──────────────────────────────────────
+  /** What to split the text by */
+  split: 'words' | 'lines';
 
   /** Animation preset (default: 'blur') */
-  variant?: 'blur' | 'slide-up' | 'slide-down' | 'fade';
+  variant?: 'blur' | 'slide-up' | 'fade';
 
-  /** Duration in seconds (default: 0.7) */
+  /** Delay between each word/line in seconds (default: 0.04 for words, 0.1 for lines) */
+  stagger?: number;
+
+  /** Duration per element in seconds (default: 0.6) */
   duration?: number;
 
-  /** Easing function (default: 'easeInOut') */
-  ease?: Easing;
-
-  /** Blur radius in px for the blur variant (default: 12) */
-  blurRadius?: number;
-
-  /** Scale offset for enter/exit — 0.05 means 1.05→1→0.95 (default: 0.05) */
-  scaleOffset?: number;
-
-  /** Delay before animation starts, in seconds (default: 0) */
+  /** Initial delay before the stagger sequence starts, in seconds (default: 0) */
   delay?: number;
 
-  // ─── Rendering ─────────────────────────────────────────────
+  /** Easing function (default: 'power3.out') */
+  ease?: string;
 
-  /** AnimatePresence mode — only used in key-change mode (default: 'popLayout') */
-  mode?: 'popLayout' | 'wait' | 'sync';
-
-  /** HTML element to render as (default: 'span') */
+  /** HTML element to render as (default: 'div') */
   as?: RevealTag;
 
-  /** Additional className */
+  /** Additional className for the wrapper element */
   className?: string;
 
-  /** Enable Framer Motion layout animation (default: true for key-change, false for in-view) */
-  layout?: boolean;
+  /** Inline styles passed through to the wrapper element */
+  style?: React.CSSProperties;
 
-  /** Content to animate */
+  /** InView options — pass object for fine-tuning, or omit for defaults */
+  inView?: InViewOptions;
+
+  /**
+   * Text content to animate.
+   * Must be a string or simple inline children.
+   * SplitText operates on innerHTML — complex React trees will be flattened.
+   */
   children: ReactNode;
 
-  /** Callback fired when reveal/enter animation completes */
+  /** Callback when the full stagger sequence completes */
   onRevealComplete?: () => void;
 }
 
-// ─── Pre-built Motion Components ──────────────────────────────
-// Created at module level to avoid React's "no component creation during
-// render" rule. Each supported `as` tag maps to its motion equivalent.
+// ─── Variant Factories ────────────────────────────────────────
 
-const MOTION_TAGS = {
-  span: motion.span,
-  div: motion.div,
-  p: motion.p,
-  h1: motion.h1,
-  h2: motion.h2,
-  h3: motion.h3,
-  h4: motion.h4,
-  h5: motion.h5,
-  h6: motion.h6,
-} as const;
-
-// ─── Variant Builders ─────────────────────────────────────────
-
-function buildVariants(
+function getFromVars(
   variant: NonNullable<TextRevealProps['variant']>,
-  blurRadius: number,
-  scaleOffset: number,
-) {
+): gsap.TweenVars {
   switch (variant) {
     case 'blur':
       return {
-        initial: { opacity: 0, filter: `blur(${blurRadius}px)`, scale: 1 + scaleOffset },
-        animate: { opacity: 1, filter: 'blur(0px)', scale: 1 },
-        exit: { opacity: 0, filter: `blur(${blurRadius}px)`, scale: 1 - scaleOffset },
+        opacity: 0,
+        filter: `blur(${TEXT_REVEAL_DEFAULTS.blurRadius}px)`,
       };
     case 'slide-up':
       return {
-        initial: { opacity: 0, y: 20 },
-        animate: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: -20 },
-      };
-    case 'slide-down':
-      return {
-        initial: { opacity: 0, y: -20 },
-        animate: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: 20 },
+        opacity: 0,
+        y: TEXT_REVEAL_DEFAULTS.slideDistance,
       };
     case 'fade':
       return {
-        initial: { opacity: 0 },
-        animate: { opacity: 1 },
-        exit: { opacity: 0 },
+        opacity: 0,
       };
   }
 }
 
-// ─── Sub-components ───────────────────────────────────────────
+// ─── Component ────────────────────────────────────────────────
 
 /**
- * KeyChangeReveal — AnimatePresence-based crossfade on key change.
- * Used for dynamic content swaps (e.g., carousel model name).
- */
-function KeyChangeReveal({
-  revealKey,
-  variants,
-  transition,
-  mode,
-  tag,
-  layout,
-  className,
-  children,
-  onRevealComplete,
-}: {
-  revealKey: string | number;
-  variants: ReturnType<typeof buildVariants>;
-  transition: Transition;
-  mode: 'popLayout' | 'wait' | 'sync';
-  tag: RevealTag;
-  layout: boolean;
-  className?: string;
-  children: ReactNode;
-  onRevealComplete?: () => void;
-}) {
-  const MotionTag = MOTION_TAGS[tag];
-
-  return (
-    <AnimatePresence mode={mode}>
-      <MotionTag
-        key={revealKey}
-        layout={layout}
-        initial={variants.initial}
-        animate={variants.animate}
-        exit={variants.exit}
-        transition={transition}
-        onAnimationComplete={onRevealComplete}
-        className={className}
-      >
-        {children}
-      </MotionTag>
-    </AnimatePresence>
-  );
-}
-
-/**
- * InViewReveal — One-shot viewport-triggered reveal.
- * Uses native IntersectionObserver via Framer Motion's useInView.
- */
-function InViewReveal({
-  inViewOpts,
-  variants,
-  transition,
-  tag,
-  className,
-  children,
-  onRevealComplete,
-}: {
-  inViewOpts: InViewOptions;
-  variants: ReturnType<typeof buildVariants>;
-  transition: Transition;
-  tag: RevealTag;
-  className?: string;
-  children: ReactNode;
-  onRevealComplete?: () => void;
-}) {
-  // Ref needs to be typed broadly for useInView (IntersectionObserver) while
-  // satisfying each specific motion element's ref prop. The cast is safe —
-  // IO only needs Element, which all HTML elements satisfy.
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, {
-    once: true,
-    amount: inViewOpts.threshold ?? TEXT_REVEAL_DEFAULTS.inViewThreshold,
-    margin: (inViewOpts.margin ?? TEXT_REVEAL_DEFAULTS.inViewMargin) as
-      `${number}px`,
-  });
-
-  const MotionTag = MOTION_TAGS[tag];
-
-  return (
-    <MotionTag
-      ref={ref}
-      initial={variants.initial}
-      animate={isInView ? variants.animate : variants.initial}
-      transition={transition}
-      onAnimationComplete={isInView ? onRevealComplete : undefined}
-      className={className}
-    >
-      {children}
-    </MotionTag>
-  );
-}
-
-// ─── Main Component ───────────────────────────────────────────
-
-/**
- * TextReveal — Global animation container for text reveals.
+ * TextReveal — Word-by-word or line-by-line text reveal.
  *
- * Two trigger modes:
- * 1. **Key-change** (`revealKey`): blur-scale-opacity crossfade when content changes.
- * 2. **In-view** (`inView`): one-shot reveal when element scrolls into viewport.
+ * Uses GSAP SplitText for DOM splitting and `gsap.from()` with `stagger`
+ * for the animation. Triggered by IntersectionObserver (once).
  *
- * Both modes share the same animation variants and automatically respect
- * `prefers-reduced-motion`. Uses Framer Motion exclusively — no GSAP dependency.
+ * - **words**: Each word animates individually with configurable stagger
+ * - **lines**: Each visual line (as rendered in the browser) animates individually
+ *
+ * SplitText handles accessibility automatically:
+ * - Sets `aria-label` on the container with original text
+ * - Sets `aria-hidden="true"` on split children
  *
  * @example
  * ```tsx
- * // Key-change mode (carousel model name)
- * <TextReveal revealKey={modelName} variant="blur">{modelName}</TextReveal>
+ * // Word-by-word blur reveal
+ * <TextReveal split="words" variant="blur" as="h1">
+ *   MODEL XRS PREMIUM
+ * </TextReveal>
  *
- * // In-view mode (section title)
- * <TextReveal inView variant="blur" as="h2">THE TEARDOWN</TextReveal>
+ * // Line-by-line slide-up
+ * <TextReveal split="lines" variant="slide-up" as="p">
+ *   Some long paragraph that wraps across multiple lines
+ * </TextReveal>
  * ```
  */
-export const TextReveal = memo(function TextReveal({
-  revealKey,
-  inView,
+export function TextReveal({
+  split,
   variant = 'blur',
+  stagger,
   duration = TEXT_REVEAL_DEFAULTS.duration,
-  ease = TEXT_REVEAL_DEFAULTS.ease as Easing,
-  blurRadius = TEXT_REVEAL_DEFAULTS.blurRadius,
-  scaleOffset = TEXT_REVEAL_DEFAULTS.scaleOffset,
   delay = 0,
-  mode = 'popLayout',
-  as = 'span',
+  ease = TEXT_REVEAL_DEFAULTS.ease,
+  as: Tag = 'div',
   className,
-  layout,
+  style,
+  inView,
   children,
   onRevealComplete,
 }: TextRevealProps) {
-  const prefersReducedMotion = useReducedMotion();
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Compute animation variants — memoized to avoid re-creation per render
-  const variants = useMemo(
-    () => buildVariants(variant, blurRadius, scaleOffset),
-    [variant, blurRadius, scaleOffset],
-  );
+  // Resolve default stagger based on split type
+  const resolvedStagger =
+    stagger ?? (split === 'words'
+      ? TEXT_REVEAL_DEFAULTS.wordStagger
+      : TEXT_REVEAL_DEFAULTS.lineStagger);
 
-  // Shared transition config
-  const transition = useMemo<Transition>(
-    () => ({
-      duration: prefersReducedMotion ? 0 : duration,
-      ease,
-      ...(delay > 0 && !prefersReducedMotion ? { delay } : {}),
-      ...(layout !== false && revealKey !== undefined
-        ? {
-            layout: {
-              type: 'tween' as const,
-              duration: prefersReducedMotion ? 0 : duration,
+  // Resolve inView options
+  const threshold = inView?.threshold ?? TEXT_REVEAL_DEFAULTS.inViewThreshold;
+  const margin = inView?.margin ?? TEXT_REVEAL_DEFAULTS.inViewMargin;
+
+  useGSAP(
+    () => {
+      const el = containerRef.current;
+      if (!el) return;
+
+      // ── Reduced motion: show immediately, no split ──
+      const prefersReducedMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)',
+      ).matches;
+
+      if (prefersReducedMotion) {
+        gsap.set(el, { opacity: 1 });
+        onRevealComplete?.();
+        return;
+      }
+
+      // ── Split the text ──
+      const splitInstance = SplitText.create(el, {
+        type: split === 'words' ? 'words' : 'lines',
+        // SplitText wraps each word/line in a div — mask ensures
+        // slide-up text is clipped to its line box
+        mask: split === 'lines' ? 'lines' : undefined,
+      });
+
+      const targets =
+        split === 'words' ? splitInstance.words : splitInstance.lines;
+
+      // Set container visible now that children are split & hidden
+      gsap.set(el, { opacity: 1 });
+
+      // Pre-set targets to initial state (invisible)
+      const fromVars = getFromVars(variant);
+      gsap.set(targets, fromVars);
+
+      // ── IntersectionObserver: trigger animation once in view ──
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (entry && entry.isIntersecting) {
+            observer.disconnect();
+
+            gsap.to(targets, {
+              ...Object.fromEntries(
+                Object.keys(fromVars).map((key) => {
+                  if (key === 'opacity') return [key, 1];
+                  if (key === 'filter') return [key, 'blur(0px)'];
+                  if (key === 'y') return [key, 0];
+                  return [key, undefined];
+                }),
+              ),
+              duration,
+              delay,
               ease,
-            },
+              stagger: resolvedStagger,
+              onComplete: () => {
+                // Clean up — restore original DOM and clear inline styles
+                splitInstance.revert();
+                gsap.set(el, { clearProps: 'opacity' });
+                onRevealComplete?.();
+              },
+            });
           }
-        : {}),
-    }),
-    [duration, ease, delay, prefersReducedMotion, layout, revealKey],
+        },
+        {
+          threshold,
+          rootMargin: margin,
+        },
+      );
+
+      observer.observe(el);
+
+      // Cleanup on unmount
+      return () => {
+        observer.disconnect();
+        splitInstance.revert();
+      };
+    },
+    { scope: containerRef, dependencies: [] },
   );
 
-  // Reduced motion: render immediately, no animation
-  if (prefersReducedMotion && inView) {
-    const Tag = as;
-    return <Tag className={className}>{children}</Tag>;
-  }
-
-  // ── Key-change mode ──
-  if (revealKey !== undefined) {
-    return (
-      <KeyChangeReveal
-        revealKey={revealKey}
-        variants={variants}
-        transition={transition}
-        mode={mode}
-        tag={as}
-        layout={layout !== false}
-        className={className}
-        onRevealComplete={onRevealComplete}
-      >
-        {children}
-      </KeyChangeReveal>
-    );
-  }
-
-  // ── In-view mode ──
-  if (inView) {
-    const inViewOpts: InViewOptions =
-      typeof inView === 'object' ? inView : {};
-
-    return (
-      <InViewReveal
-        inViewOpts={inViewOpts}
-        variants={variants}
-        transition={transition}
-        tag={as}
-        className={className}
-        onRevealComplete={onRevealComplete}
-      >
-        {children}
-      </InViewReveal>
-    );
-  }
-
-  // ── No trigger — static render ──
-  const Tag = as;
-  return <Tag className={className}>{children}</Tag>;
-});
+  return (
+    <Tag
+      ref={containerRef as React.RefObject<HTMLElement & HTMLDivElement>}
+      className={className}
+      style={{ opacity: 0, ...style }}
+    >
+      {children}
+    </Tag>
+  );
+}

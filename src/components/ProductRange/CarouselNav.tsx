@@ -1,6 +1,5 @@
 import { forwardRef } from "react";
-import { motion } from "framer-motion";
-import { TextReveal } from "@/components/ui/TextReveal";
+import { AnimatePresence, motion } from "framer-motion";
 import { CarouselButton } from "./CarouselButton";
 
 interface CarouselNavProps {
@@ -13,6 +12,7 @@ interface CarouselNavProps {
 /**
  * CarouselNav — Active model title display + prev/next navigation buttons.
  * Title shows a diagonal arrow on hover. Animated in via GSAP ScrollTrigger.
+ * Model name crossfade uses inline Framer Motion AnimatePresence (key-change).
  */
 export const CarouselNav = forwardRef<HTMLDivElement, CarouselNavProps>(
    function CarouselNav(
@@ -59,13 +59,20 @@ export const CarouselNav = forwardRef<HTMLDivElement, CarouselNavProps>(
                   >
                      {firstWord}
                   </motion.span>
-                  <TextReveal
-                     revealKey={suffix}
-                     variant="blur"
-                     className="inline-block whitespace-nowrap"
-                  >
-                     {suffix}
-                  </TextReveal>
+                  {/* Key-change crossfade for the model suffix */}
+                  <AnimatePresence mode="popLayout">
+                     <motion.span
+                        key={suffix}
+                        layout
+                        initial={{ opacity: 0, filter: 'blur(8px)', scale: 1.05 }}
+                        animate={{ opacity: 1, filter: 'blur(0px)', scale: 1 }}
+                        exit={{ opacity: 0, filter: 'blur(8px)', scale: 0.95 }}
+                        transition={{ duration: 0.5, ease: 'easeInOut' }}
+                        className="inline-block whitespace-nowrap"
+                     >
+                        {suffix}
+                     </motion.span>
+                  </AnimatePresence>
                   {/* Diagonal arrow — appears on hover */}
                   <motion.svg
                      layout
