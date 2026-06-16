@@ -4,8 +4,7 @@ import { forwardRef, type RefObject } from "react";
 import { HeroLogo } from "./HeroLogo";
 import { HeroTitle } from "./HeroTitle";
 import { HeroInfo, type HeroInfoHandle } from "./HeroInfo";
-import { useMousePosition } from "@/hooks/useMousePosition";
-
+import { InteractivePanel } from "@/components/ui/InteractivePanel";
 interface HeroBannerProps {
    /** Ref forwarded to the HeroLogo container for GSAP targeting */
    logoRef: RefObject<HTMLDivElement | null>;
@@ -24,35 +23,21 @@ interface HeroBannerProps {
  */
 export const HeroBanner = forwardRef<HTMLDivElement, HeroBannerProps>(
    function HeroBanner({ logoRef, infoRef }, ref) {
-      const { handleMouseMove } = useMousePosition();
-
       return (
-         <div
+         <InteractivePanel
             ref={ref}
             id="hero-banner"
-            className="w-full h-[400px] md:h-[520px] lg:h-[620px] relative flex flex-col z-0 drop-shadow-2xl will-change-[transform,opacity]"
-            onMouseMove={handleMouseMove}
+            className="w-full h-[400px] md:h-[520px] lg:h-[620px] relative flex flex-col z-0 will-change-[transform,opacity]"
             style={{
                // Inline opacity:0 prevents FOUC — applies before CSS/JS loads
                opacity: 0,
-               background:
-                  "radial-gradient(circle 800px at var(--mouse-x, 0%) var(--mouse-y, 50%), #2a1508 0%, #101010 70%, #101010 100%)",
-               clipPath: `polygon(
-           24px 0,
-           calc(100% - 24px) 0,
-           100% 24px,
-           100% calc(100% - 24px),
-           calc(100% - 24px) 100%,
-           24px 100%,
-           0 calc(100% - 24px),
-           0 24px
-         )`,
             }}
+            gradient="radial-gradient(circle 800px at var(--mouse-x, 0%) var(--mouse-y, 50%), #2a1508 0%, #101010 70%, #101010 100%)"
          >
             <HeroLogo ref={logoRef} />
             <HeroTitle />
             <HeroInfo ref={infoRef} />
-         </div>
+         </InteractivePanel>
       );
    },
 );

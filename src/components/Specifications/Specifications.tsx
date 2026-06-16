@@ -5,7 +5,6 @@ import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { useMousePosition } from "@/hooks/useMousePosition";
 import {
    SPEC_CALLOUTS,
    SPEC_SECONDARY,
@@ -17,20 +16,10 @@ import {
    type SpecCallout,
 } from "@/lib/specs";
 import { TextReveal } from "@/components/ui/TextReveal";
+import { InteractivePanel } from "@/components/ui/InteractivePanel";
+import { SpecCalloutBlock } from "./SpecCalloutBlock";
 
 gsap.registerPlugin(ScrollTrigger);
-
-/** Octagonal corner cut matching the hero banner. */
-const PANEL_CLIP = `polygon(
-  24px 0,
-  calc(100% - 24px) 0,
-  100% 24px,
-  100% calc(100% - 24px),
-  calc(100% - 24px) 100%,
-  24px 100%,
-  0 calc(100% - 24px),
-  0 24px
-)`;
 
 /** Build an SVG path "d" string from a polyline of points. */
 function toPath(points: SpecCallout["points"]): string {
@@ -56,13 +45,12 @@ interface PartRefs {
  */
 export function Specifications() {
    const sectionRef = useRef<HTMLElement>(null);
+   const containerRef = useRef<HTMLDivElement>(null);
    const stageRef = useRef<HTMLDivElement>(null);
    const headphoneRef = useRef<HTMLDivElement>(null);
    const ghostRef = useRef<HTMLDivElement>(null);
    const railFillRef = useRef<HTMLDivElement>(null);
    const partsRef = useRef<Record<string, PartRefs>>({});
-
-   const { handleMouseMove } = useMousePosition();
 
    const setPartRef =
       (id: string, key: keyof PartRefs) => (el: PartRefs[keyof PartRefs]) => {
@@ -124,7 +112,7 @@ export function Specifications() {
                // when an ancestor has `overflow-x: hidden` (it becomes a scroller).
                const tl = gsap.timeline({
                   scrollTrigger: {
-                     trigger: sectionRef.current,
+                     trigger: containerRef.current,
                      start: "top top",
                      end: "bottom bottom",
                      scrub: 1,
@@ -298,17 +286,12 @@ export function Specifications() {
          ref={sectionRef}
          id="specifications-section"
          aria-label="Technical Specifications"
-         className="relative w-full bg-white md:h-[360vh]"
+         className="w-full bg-white relative pb-12 md:pb-24 pt-12 md:pt-24 z-10"
       >
-         <div className="flex justify-center py-12 md:py-0 md:sticky md:top-0 md:h-screen md:items-center">
-            <div
-               onMouseMove={handleMouseMove}
-               className="relative w-[96%] max-w-[1920px] mx-auto flex flex-col md:h-[88vh] md:max-h-[920px] text-white overflow-hidden drop-shadow-2xl"
-               style={{
-                  clipPath: PANEL_CLIP,
-                  background:
-                     "radial-gradient(circle 900px at var(--mouse-x, 70%) var(--mouse-y, 40%), #2a1508 0%, #101010 68%, #0b0b0b 100%)",
-               }}
+         <div ref={containerRef} className="relative w-full md:h-[300vh]">
+            <InteractivePanel
+               className="md:sticky md:top-[6vh] w-[96%] max-w-[1920px] mx-auto flex flex-col md:h-[88vh] md:max-h-[920px] text-white overflow-hidden drop-shadow-2xl"
+               gradient="radial-gradient(circle 900px at var(--mouse-x, 70%) var(--mouse-y, 40%), #2a1508 0%, #101010 68%, #0b0b0b 100%)"
             >
                <div
                   ref={ghostRef}
@@ -422,32 +405,11 @@ export function Specifications() {
                               transform: `translate(${c.label.dir === "l" ? "-100%" : "0"}, -50%)`,
                            }}
                         >
-                           <div
-                              className={`flex items-center gap-2 ${c.label.dir === "l" ? "justify-end" : "justify-start"}`}
-                           >
-                              <span className="font-saira text-[10px] tracking-[0.3em] text-brand-orange">
-                                 {c.index}
-                              </span>
-                              <span className="font-saira text-[10px] uppercase tracking-[0.3em] text-white/50">
-                                 {c.name}
-                              </span>
-                           </div>
-                           <div
-                              className={`flex items-baseline gap-1 mt-1 ${c.label.dir === "l" ? "justify-end" : "justify-start"}`}
-                           >
-                              <span
-                                 ref={setPartRef(c.id, "number")}
-                                 className="font-saira font-medium text-4xl lg:text-5xl leading-none tabular-nums tracking-tight"
-                              >
-                                 {formatValue(c.value)}
-                              </span>
-                              <span className="font-saira text-sm font-medium text-white/70">
-                                 {c.unit}
-                              </span>
-                           </div>
-                           <p className="font-roboto text-[11px] leading-snug text-white/45 mt-1">
-                              {c.detail}
-                           </p>
+                           <SpecCalloutBlock
+                              callout={c}
+                              variant="desktop"
+                              numberRef={setPartRef(c.id, "number")}
+                           />
                         </div>
                      ))}
                   </div>
@@ -460,25 +422,7 @@ export function Specifications() {
                         data-spec-card
                         className="bg-[#101010] p-4"
                      >
-                        <div className="flex items-center gap-2">
-                           <span className="font-saira text-[10px] tracking-[0.3em] text-brand-orange">
-                              {c.index}
-                           </span>
-                           <span className="font-saira text-[10px] uppercase tracking-[0.3em] text-white/50">
-                              {c.name}
-                           </span>
-                        </div>
-                        <div className="flex items-baseline gap-1 mt-2">
-                           <span className="font-saira font-medium text-3xl leading-none tabular-nums tracking-tight">
-                              {formatValue(c.value)}
-                           </span>
-                           <span className="font-saira text-xs font-medium text-white/70">
-                              {c.unit}
-                           </span>
-                        </div>
-                        <p className="font-roboto text-[11px] leading-snug text-white/45 mt-1">
-                           {c.detail}
-                        </p>
+                        <SpecCalloutBlock callout={c} variant="mobile" />
                      </div>
                   ))}
                </div>
@@ -512,7 +456,7 @@ export function Specifications() {
                      style={{ transform: "scaleX(0)" }}
                   />
                </div>
-            </div>
+            </InteractivePanel>
          </div>
       </section>
    );
