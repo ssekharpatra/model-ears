@@ -10,7 +10,6 @@ import { useCallback, useRef, useEffect } from 'react';
 export function useMousePosition() {
   const rafId = useRef<number | null>(null);
 
-  // Cleanup pending rAF on unmount
   useEffect(() => {
     return () => {
       if (rafId.current !== null) {

@@ -31,7 +31,7 @@ export function useCursorFollower() {
 
   /** Start the animation loop if not already running */
   const startLoop = useCallback(() => {
-    if (rafId.current !== null) return; // already running
+    if (rafId.current !== null) return;
 
     const tick = () => {
       currentPos.current.x = lerp(currentPos.current.x, targetPos.current.x, 0.15);
@@ -56,7 +56,6 @@ export function useCursorFollower() {
     rafId.current = requestAnimationFrame(tick);
   }, []);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (rafId.current !== null) {

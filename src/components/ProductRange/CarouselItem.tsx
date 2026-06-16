@@ -2,7 +2,6 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Product } from '@/types';
 
-// Wrap Next.js Image with framer-motion so it can animate layout changes seamlessly
 const MotionImage = motion.create(Image);
 
 interface CarouselItemProps {
@@ -71,7 +70,6 @@ export function CarouselItem({
         tabIndex={-1}
         aria-hidden={!isActive}
       >
-        {/* Hover gradient overlay (Only on active) */}
         {isActive && (
           <div 
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full aspect-square bg-[radial-gradient(circle,_rgba(246,115,0,0.19)_0%,_transparent_50%)] opacity-0 group-hover/link:opacity-100 transition-opacity duration-700 ease-in-out pointer-events-none z-0" 

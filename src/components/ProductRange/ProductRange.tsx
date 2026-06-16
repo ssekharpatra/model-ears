@@ -31,7 +31,6 @@ export function ProductRange() {
   const carousel = useCarousel(PRODUCTS);
   const cursorFollower = useCursorFollower();
   
-  // State to track if the centered active product is being hovered
   const [isCenterHovered, setIsCenterHovered] = useState(false);
   
   // Ref-based animation lock — avoids stale setTimeout issues
@@ -51,7 +50,6 @@ export function ProductRange() {
     setTimeout(() => { isAnimatingRef.current = false; }, 500);
   }, [carousel]);
 
-  // Keyboard arrow key navigation for the carousel
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
@@ -73,13 +71,11 @@ export function ProductRange() {
   // Scroll-triggered animations using useGSAP (never useEffect)
   useGSAP(
     () => {
-      // Check for reduced motion preference
       const prefersReducedMotion = window.matchMedia(
         '(prefers-reduced-motion: reduce)'
       ).matches;
 
       if (prefersReducedMotion) {
-        // Show elements immediately without animation
         gsap.set([ourRangeRef.current, carouselRef.current, carouselNavRef.current], {
           opacity: 1,
           y: 0,
@@ -87,7 +83,7 @@ export function ProductRange() {
         return;
       }
 
-      // 1. "OUR RANGE" background text rises majestically when it enters the viewport
+      // 1. Reveal "OUR RANGE" background text
       gsap.fromTo(
         ourRangeRef.current,
         ANIM_PRESETS.fadeInUp.from,
@@ -100,7 +96,7 @@ export function ProductRange() {
         }
       );
 
-      // 2. All products and Navigation Title glide up together when scrolled deeper
+      // 2. Glide up products and navigation title
       const act2Tl = gsap.timeline({
         scrollTrigger: {
           trigger: carouselWrapperRef.current,

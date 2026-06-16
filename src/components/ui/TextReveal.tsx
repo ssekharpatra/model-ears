@@ -6,10 +6,8 @@ import { SplitText } from 'gsap/SplitText';
 import { useGSAP } from '@gsap/react';
 import { TEXT_REVEAL_DEFAULTS } from '@/lib/animations';
 
-// Register plugin once at module level
 gsap.registerPlugin(SplitText);
 
-// ─── Types ────────────────────────────────────────────────────
 
 /** Supported HTML tags for the wrapper element. */
 type RevealTag = 'div' | 'p' | 'span' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
@@ -63,7 +61,6 @@ interface TextRevealProps {
   onRevealComplete?: () => void;
 }
 
-// ─── Variant Factories ────────────────────────────────────────
 
 function getFromVars(
   variant: NonNullable<TextRevealProps['variant']>,
@@ -86,7 +83,6 @@ function getFromVars(
   }
 }
 
-// ─── Component ────────────────────────────────────────────────
 
 /**
  * TextReveal — Word-by-word or line-by-line text reveal.
@@ -145,7 +141,6 @@ export function TextReveal({
       const el = containerRef.current;
       if (!el) return;
 
-      // ── Reduced motion: show immediately, no split ──
       const prefersReducedMotion = window.matchMedia(
         '(prefers-reduced-motion: reduce)',
       ).matches;
@@ -156,7 +151,6 @@ export function TextReveal({
         return;
       }
 
-      // ── Split the text ──
       const splitInstance = SplitText.create(el, {
         type: split === 'words' ? 'words' : 'lines',
         // SplitText wraps each word/line in a div — mask ensures
@@ -174,7 +168,6 @@ export function TextReveal({
       const fromVars = getFromVars(variant);
       gsap.set(targets, fromVars);
 
-      // ── IntersectionObserver: trigger animation once in view ──
       const observer = new IntersectionObserver(
         (entries) => {
           const entry = entries[0];
@@ -211,7 +204,6 @@ export function TextReveal({
 
       observer.observe(el);
 
-      // Cleanup on unmount
       return () => {
         observer.disconnect();
         splitInstance.revert();

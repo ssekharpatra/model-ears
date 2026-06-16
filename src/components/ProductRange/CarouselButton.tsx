@@ -31,7 +31,6 @@ export function CarouselButton({
             xmlns="http://www.w3.org/2000/svg"
             className={`${isNext ? "" : "rotate-180"} opacity-60`}
          >
-            {/* Circle outline */}
             <circle
                cx="20"
                cy="20"
@@ -40,7 +39,6 @@ export function CarouselButton({
                strokeWidth="1.5"
                fill="none"
             />
-            {/* Chevron arrow */}
             <polyline
                points="17,13 24,20 17,27"
                stroke="#F67300"

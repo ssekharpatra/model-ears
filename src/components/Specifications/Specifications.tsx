@@ -310,7 +310,6 @@ export function Specifications() {
                      "radial-gradient(circle 900px at var(--mouse-x, 70%) var(--mouse-y, 40%), #2a1508 0%, #101010 68%, #0b0b0b 100%)",
                }}
             >
-               {/* Ghost word */}
                <div
                   ref={ghostRef}
                   aria-hidden="true"
@@ -321,7 +320,6 @@ export function Specifications() {
                   </span>
                </div>
 
-               {/* Header */}
                <header className="relative z-20 px-6 pt-8 md:absolute md:top-10 md:left-12 md:p-0 max-w-xl">
                   <TextReveal
                      split="words"
@@ -332,7 +330,6 @@ export function Specifications() {
                   >
                      {SPEC_HEADING_LINE1} {SPEC_HEADING_LINE2}
                   </TextReveal>
-                  {/* Mobile intro */}
                   <TextReveal
                      split="words"
                      variant="blur"
@@ -343,7 +340,6 @@ export function Specifications() {
                   >
                      {SPEC_INTRO_MOBILE}
                   </TextReveal>
-                  {/* Desktop intro */}
                   <TextReveal
                      split="words"
                      variant="blur"
@@ -356,12 +352,10 @@ export function Specifications() {
                   </TextReveal>
                </header>
 
-               {/* Stage: headphone + schematic overlay */}
                <div
                   ref={stageRef}
                   className="relative z-10 mx-auto mt-6 w-full max-w-[440px] aspect-square md:mt-0 md:mx-0 md:max-w-none md:w-auto md:h-[72%] md:absolute md:top-[54%] md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2"
                >
-                  {/* Headphone */}
                   <div
                      ref={headphoneRef}
                      className="absolute inset-0 z-10 will-change-transform"
@@ -376,7 +370,6 @@ export function Specifications() {
                      />
                   </div>
 
-                  {/* Leader lines + nodes (desktop overlay) */}
                   <svg
                      viewBox="0 0 1000 1000"
                      className="hidden md:block absolute inset-0 z-20 w-full h-full pointer-events-none overflow-visible"
@@ -396,7 +389,6 @@ export function Specifications() {
                               strokeDasharray={1}
                               vectorEffect="non-scaling-stroke"
                            />
-                           {/* expanding ping ring */}
                            <circle
                               ref={setPartRef(c.id, "ring")}
                               cx={c.anchor.x}
@@ -407,7 +399,6 @@ export function Specifications() {
                               strokeWidth={2}
                               vectorEffect="non-scaling-stroke"
                            />
-                           {/* solid node */}
                            <circle
                               ref={setPartRef(c.id, "dot")}
                               cx={c.anchor.x}
@@ -419,7 +410,6 @@ export function Specifications() {
                      ))}
                   </svg>
 
-                  {/* Labels (desktop, absolutely placed) */}
                   <div className="hidden md:block absolute inset-0 z-30 pointer-events-none">
                      {SPEC_CALLOUTS.map((c) => (
                         <div
@@ -463,7 +453,6 @@ export function Specifications() {
                   </div>
                </div>
 
-               {/* Mobile stacked spec cards */}
                <div className="md:hidden relative z-20 grid grid-cols-2 gap-px bg-white/10 mt-8 mx-6 rounded-sm overflow-hidden">
                   {SPEC_CALLOUTS.map((c) => (
                      <div
@@ -494,7 +483,6 @@ export function Specifications() {
                   ))}
                </div>
 
-               {/* Secondary spec ledger */}
                <div className="relative z-20 mt-8 md:mt-0 md:absolute md:bottom-0 md:inset-x-0 border-t border-white/10 px-6 md:px-12 py-4">
                   <ul className="flex flex-wrap items-center gap-x-6 gap-y-2 md:justify-between">
                      {SPEC_SECONDARY.map((s) => (

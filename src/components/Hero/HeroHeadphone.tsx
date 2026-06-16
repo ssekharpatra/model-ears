@@ -55,7 +55,6 @@ export function HeroHeadphone() {
       );
 
       function initParallax() {
-        // Skip parallax on touch devices
         const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
         if (isTouchDevice) return;
 
@@ -82,8 +81,6 @@ export function HeroHeadphone() {
         };
 
         window.addEventListener('mousemove', handleMouseMove);
-
-        // GSAP contextSafe cleanup handles this automatically via scope
       }
     },
     { scope: containerRef },
