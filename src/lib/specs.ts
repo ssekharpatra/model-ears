@@ -42,6 +42,9 @@ export const SPEC_GHOST_WORD = "ANATOMY";
 export const SPEC_INTRO =
    "Every millimeter accounted for. Scroll to trace the MODEL SYMPHONY and watch each figure resolve into the engineering behind the sound.";
 
+export const SPEC_INTRO_MOBILE =
+   "Every millimeter accounted for. Explore the MODEL SYMPHONY — each figure tells the story of the engineering behind the sound.";
+
 export const SPEC_CALLOUTS: SpecCallout[] = [
    {
       id: "driver",

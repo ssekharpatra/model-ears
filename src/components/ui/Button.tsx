@@ -16,7 +16,7 @@ export function Button({ children, onClick, className = "" }: ButtonProps) {
          className={`
         bg-brand-orange hover:bg-brand-orange
         rounded-3xl text-white px-8 py-3
-        text-xs font-medium tracking-wider
+        text-xs font-medium tracking-wider whitespace-nowrap
         transition-all duration-300
         hover:shadow-[0_0_26px_#f67300]
         active:scale-95

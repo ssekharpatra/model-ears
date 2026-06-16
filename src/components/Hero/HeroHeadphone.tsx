@@ -56,6 +56,22 @@ export function HeroHeadphone() {
     >
       <div id="hero-headphone-wrapper" className="absolute inset-0 w-full h-full">
         <div ref={imageWrapperRef} className="w-full h-full relative will-change-transform">
+          {/* Mobile: full headphone image */}
+          <Image
+            src="/assets/images/hero/hero-headphone-full.webp"
+            alt="Model XRS Headphone"
+            width={1143}
+            height={803}
+            priority
+            sizes="75vw"
+            className="md:hidden absolute top-1/2 left-1/2
+              -translate-x-[50%]
+              -translate-y-[50%]
+              h-[70%]
+              w-auto max-w-none object-contain
+              pointer-events-none"
+          />
+          {/* Desktop: cropped headphone image */}
           <Image
             src="/assets/images/hero/hero-headphone.webp"
             alt="Model XRS Headphone"
@@ -63,10 +79,10 @@ export function HeroHeadphone() {
             height={803}
             priority
             sizes="(max-width: 1024px) 75vw, 50vw"
-            className="absolute top-1/2 left-1/2
-              -translate-x-[50%] md:-translate-x-[55%] lg:-translate-x-[60%]
-              -translate-y-[50%] md:-translate-y-[48%]
-              h-[70%] md:h-[85%] lg:h-[125%]
+            className="hidden md:block absolute top-1/2 left-1/2
+              md:-translate-x-[55%] lg:-translate-x-[60%]
+              md:-translate-y-[48%]
+              md:h-[85%] lg:h-[125%]
               w-auto max-w-none object-contain
               pointer-events-none"
           />
