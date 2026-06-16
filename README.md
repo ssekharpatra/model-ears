@@ -2,7 +2,7 @@
 
 A pixel-perfect, high-performance single-page product showcase for premium headphones, built as a frontend engineering assignment for UPDOT.
 
-**[Live Demo →](https://model-ears.vercel.app)** <!-- Update with actual deployed URL -->
+**[Live Demo →](https://model-ears.vercel.app)**
 
 ---
 
@@ -16,30 +16,37 @@ A pixel-perfect, high-performance single-page product showcase for premium headp
 | **Tailwind CSS**         | 4       | `@theme` design tokens, utility-first styling, zero-runtime CSS              |
 | **GSAP** + `@gsap/react` | 3.15    | Scroll-triggered reveal animations — `useGSAP` hook for React-safe cleanup   |
 | **Framer Motion**        | 12      | Component-level FLIP layout animations for carousel transitions              |
+| **Lenis**                | 1.3     | High-performance smooth scrolling synced natively with the GSAP ticker       |
 
 ### Why GSAP + Framer Motion together?
 
-Each library excels at different things. **GSAP** handles scroll-triggered viewport animations (the "OUR RANGE" text and carousel sliding up) with fine-grained timeline control. **Framer Motion** handles React layout animations (carousel item position swapping with `layout` prop) and presence transitions (`AnimatePresence`). This split avoids fighting React's rendering model while getting best-in-class animation quality from each tool.
+Each library excels at different things. **GSAP** handles scroll-triggered viewport animations, complex scroll-scrubbing timelines, and text splitting with fine-grained control. **Framer Motion** handles React layout animations (carousel item position swapping with `layout` prop) and presence transitions. This split avoids fighting React's rendering model while getting best-in-class animation quality from each tool.
 
 ---
 
-## Getting Started
+## Major Engineering Features
 
-```bash
-# Install dependencies
-npm install
+### 1. Unified Animation Loop (Lenis + GSAP)
+To avoid the classic 1–2 frame jitter caused by running dual `requestAnimationFrame` loops, Lenis's internal RAF loop is explicitly disabled (`autoRaf: false`). Instead, Lenis is driven directly by GSAP's global ticker (`gsap.ticker.add`), resulting in a single, perfectly synced animation loop across all scroll and transform updates.
 
-# Start development server
-npm run dev
+### 2. The Teardown Schematic (Specifications)
+A complex "Apple-style" product teardown section built using pure GSAP and SVG. 
+- **Sticky vs. Pin:** Uses native `position: sticky` to keep the panel in view rather than GSAP's `pin`, avoiding layout breakage when ancestors have `overflow-x: hidden`.
+- **Scroll Scrubbing:** A single GSAP timeline scrubs directly with scroll progress. As the user scrolls, SVG leader lines are drawn (`strokeDashoffset`), pulsing rings expand, and specification numbers rapidly count up to their exact values simultaneously.
 
-# Production build
-npm run build && npm start
+### 3. Scroll Reversal Prevention
+A conscious design decision was made to prevent jarring re-animations when a user scrolls back up the page. Scroll-triggered animations use `toggleActions: 'play none none none'` or `IntersectionObserver` (which immediately disconnects upon intersection) to guarantee one-time, premium reveals.
 
-# Lint
-npm run lint
-```
+### 4. Reusable Text Reveal Component
+Created a highly reusable `<TextReveal>` component leveraging GSAP's `SplitText`. 
+- **Performance:** Uses `IntersectionObserver` instead of heavy scroll listeners to trigger animations.
+- **Flexibility:** Supports splitting by `words` or `lines`, with configurable stagger, delays, and animation variants (blur, slide-up, fade).
 
-Open [http://localhost:3000](http://localhost:3000) to view the site.
+### 5. Battery & CPU Optimization
+The custom `useCursorFollower` hook uses a custom `requestAnimationFrame` loop with linear interpolation (`lerp`) for perfectly smooth tracking. However, it implements strict **wind-down logic**: the loop completely halts when the cursor stops moving or leaves the carousel area, ensuring zero idle CPU usage.
+
+### 6. Developer Experience (DX)
+The codebase underwent a rigorous comment review process. Visual noise and redundant explanations of obvious React lifecycle hooks were completely removed. Comments left behind are strictly focused on the **why** (e.g., explaining workaround logic for stale closures, animation locking, or browser rendering quirks) and architectural JSDocs to radically improve onboarding speed.
 
 ---
 
@@ -68,15 +75,21 @@ src/
 │   │   ├── CursorFollower.tsx # Fixed-position orange tooltip with marquee
 │   │   ├── OurRangeText.tsx # Decorative background text
 │   │   └── ProductDescription.tsx # Centered paragraph between sections
+│   ├── Specifications/
+│   │   └── Specifications.tsx # Pinned teardown schematic with scroll scrubbing
+│   ├── providers/
+│   │   └── SmoothScrollProvider.tsx # Lenis integration synced with GSAP ticker
 │   └── ui/
-│       └── Button.tsx      # Reusable primary button with variants support
+│       ├── Button.tsx      # Reusable primary button with variants support
+│       └── TextReveal.tsx  # IntersectionObserver-triggered SplitText animation
 ├── hooks/
 │   ├── useMousePosition.ts # rAF-throttled CSS variable updates for gradient
 │   ├── useCarousel.ts      # Circular carousel state (prev/next/goTo)
-│   └── useCursorFollower.ts # Lerp-based smooth cursor tracking
+│   └── useCursorFollower.ts # Lerp-based smooth cursor tracking with auto-halt
 ├── lib/
 │   ├── constants.ts        # Product data, text content, animation durations
 │   ├── fonts.ts            # Font loading (local Schein + Google Roboto/Saira)
+│   ├── specs.ts            # Schematic callout coordinate data
 │   └── animations.ts       # Reusable GSAP animation presets + ScrollTrigger config
 └── types/
     └── index.ts            # Product, CarouselState, VisibleProducts interfaces
@@ -84,8 +97,8 @@ src/
 
 ### Component Design Philosophy
 
-- **Server components by default** — `Hero` and `page.tsx` are server-rendered. Only interactive children (`HeroBanner`, `HeroHeadphone`, `ProductRange`) use `'use client'`.
-- **No prop drilling for static content** — Components import directly from `@/lib/constants`.
+- **Server components by default** — `Hero` and `page.tsx` are server-rendered. Only interactive children (`HeroBanner`, `HeroHeadphone`, `ProductRange`, `Specifications`) use `'use client'`.
+- **No prop drilling for static content** — Components import directly from `@/lib/constants` and `@/lib/specs`.
 - **Hooks extract reusable logic** — Mouse tracking, carousel state, and cursor following are isolated into custom hooks with proper cleanup.
 
 ---
@@ -93,26 +106,21 @@ src/
 ## Design Decisions & Trade-offs
 
 ### Font Strategy
-
 The reference site uses "Schein Sans" — a custom display font. I sourced the OTF and converted it to **WOFF2** (81% size reduction: 76KB → 14KB). Loaded via `next/font/local` for self-hosting, automatic preloading, and zero CLS.
 
 ### Carousel Implementation
-
 Chose Framer Motion's `layout` prop for carousel position swapping over GSAP or CSS transitions. This enables **automatic FLIP animations** — React handles the DOM reorder, Framer Motion calculates and animates the position delta. The trade-off is a slightly larger bundle, but the animation quality is significantly smoother for layout changes.
 
 ### Ghost Element Pattern
-
 The carousel uses an invisible "ghost" element to maintain consistent height. Without it, the absolute-positioned carousel items cause the section to collapse to zero height, creating layout shift when scroll animations trigger.
 
 ### Image Optimization
-
 - Hero headphone: `priority` for LCP optimization
 - All images: proper `sizes` prop for responsive srcset selection
 - AVIF format enabled in `next.config.ts` for smaller file sizes than WebP
 - Carousel images: default lazy loading (below the fold)
 
 ### Animation Lock
-
 Carousel transitions use a `useRef`-based animation lock (not `useState`) to prevent rapid clicking from causing overlapping animations. The ref avoids unnecessary re-renders that state-based locks cause.
 
 ---
@@ -128,21 +136,11 @@ Carousel transitions use a `useRef`-based animation lock (not `useState`) to pre
 
 ### Key optimizations:
 
-- **`will-change: transform`** on parallax wrapper and cursor follower (GPU layer promotion)
-- **rAF-throttled** mouse position updates (not raw `mousemove`)
-- **Cursor follower loop stops when idle** — only runs during hover + wind-down
-- **`prefers-reduced-motion`** respected in both CSS and JavaScript
-- **AVIF + WebP** image formats with tuned device sizes
-
----
-
-## Bonus Features Implemented
-
-1. **Parallax on hero headphone** — GSAP `quickTo` creates smooth mouse-driven parallax with 30px max movement and eased following (Tier 1)
-2. **Design tokens system** — Tailwind v4 `@theme` tokens for colors, fonts, and animations. GSAP animation presets in `lib/animations.ts` (Tier 2)
-3. **Reusable Button component** — Extensible with className prop for future variants (Tier 2)
-4. **Keyboard navigation** — Arrow keys navigate the carousel, Enter/Space activate side items
-5. **Accessibility** — Semantic HTML, ARIA labels, focus-visible styles, reduced motion support
+- **Unified Animation Loop** via GSAP ticker + Lenis.
+- **`will-change: transform`** on parallax wrapper and cursor follower (GPU layer promotion).
+- **rAF-throttled** mouse position updates (not raw `mousemove`).
+- **Cursor follower loop stops when idle** — only runs during hover + wind-down.
+- **AVIF + WebP** image formats with tuned device sizes.
 
 ---
 
@@ -153,9 +151,29 @@ Carousel transitions use a `useRef`-based animation lock (not `useState`) to pre
 - `aria-live="polite"` on carousel container for screen reader announcements
 - `aria-hidden="true"` on decorative elements (OUR RANGE text, logo SVG)
 - Focus-visible orange ring (`outline: 2px solid #f67300`)
-- `prefers-reduced-motion` disables all animations via CSS and GSAP
+- **`prefers-reduced-motion` deeply integrated**: Explicitly checked via `window.matchMedia` across all GSAP timelines and component hooks to instantaneously show final states without animation for users who prefer reduced motion.
 - Keyboard-navigable carousel (Arrow keys, Enter, Space)
 
 ---
 
-_Built by Sudhansu Sekhar Patra_
+## Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Production build
+npm run build && npm start
+
+# Lint
+npm run lint
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view the site.
+
+---
+
+*Built by Sudhansu Sekhar Patra*
