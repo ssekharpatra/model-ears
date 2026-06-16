@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { fontVariables } from '@/lib/fonts';
+import { SmoothScrollProvider } from '@/components/providers/SmoothScrollProvider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -21,7 +22,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${fontVariables} antialiased`}>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <SmoothScrollProvider>{children}</SmoothScrollProvider>
+      </body>
     </html>
   );
 }
