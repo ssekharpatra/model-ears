@@ -12,7 +12,6 @@ export default function Home() {
          <Hero />
          <ProductRange />
          <Specifications />
-         <div className="w-full h-svh bg-black"></div>
       </main>
    );
 }
