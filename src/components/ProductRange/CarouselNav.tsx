@@ -35,11 +35,27 @@ export const CarouselNav = forwardRef<HTMLDivElement, CarouselNavProps>(
             >
                <motion.h3
                   layout
-                  transition={{ layout: { type: "tween", duration: 0.5, ease: "easeInOut" } }}
+                  transition={{
+                     layout: {
+                        type: "tween",
+                        duration: 0.5,
+                        ease: "easeInOut",
+                     },
+                  }}
                   id="active-model-title"
                   className="text-2xl sm:text-4xl md:text-[42px] font-medium uppercase font-schein flex items-center tracking-wide"
                >
-                  <motion.span layout transition={{ layout: { type: "tween", duration: 0.5, ease: "easeInOut" } }} className="mr-4">
+                  <motion.span
+                     layout
+                     transition={{
+                        layout: {
+                           type: "tween",
+                           duration: 0.5,
+                           ease: "easeInOut",
+                        },
+                     }}
+                     className="mr-2 md:mr-4"
+                  >
                      {firstWord}
                   </motion.span>
                   <AnimatePresence mode="popLayout">
@@ -62,7 +78,13 @@ export const CarouselNav = forwardRef<HTMLDivElement, CarouselNavProps>(
                   {/* Diagonal arrow — appears on hover */}
                   <motion.svg
                      layout
-                     transition={{ layout: { type: "tween", duration: 0.5, ease: "easeInOut" } }}
+                     transition={{
+                        layout: {
+                           type: "tween",
+                           duration: 0.5,
+                           ease: "easeInOut",
+                        },
+                     }}
                      className={`w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 ml-1 sm:ml-2 md:ml-4 text-black transition-opacity duration-300 ${
                         isCenterHovered
                            ? "opacity-100"
