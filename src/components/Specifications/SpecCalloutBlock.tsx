@@ -45,7 +45,7 @@ export function SpecCalloutBlock({
                   variant === "desktop" ? "text-4xl lg:text-5xl" : "text-3xl"
                }`}
             >
-               {/* 
+               {/*
                 * On desktop, GSAP will overwrite this value during scroll scrub.
                 * On mobile, it just displays the final value.
                 */}
@@ -62,7 +62,9 @@ export function SpecCalloutBlock({
 
          <p
             className={`font-roboto text-[11px] leading-snug text-white/45 mt-1 ${
-               isLeft ? "text-right" : "text-left"
+               variant === "desktop"
+                  ? `max-w-[110px] ${isLeft ? "text-right ml-auto" : "text-left mr-auto"}`
+                  : "text-left"
             }`}
          >
             {c.detail}

@@ -92,128 +92,140 @@ export function Specifications() {
             });
          };
 
+         const setupTeardownTimeline = (startScale: number, endScale: number) => {
+            gsap.set(allLabels, { opacity: 0, y: 16 });
+            gsap.set(allDots, { scale: 0, transformOrigin: "center" });
+            gsap.set(allRings, {
+               scale: 0,
+               opacity: 0,
+               transformOrigin: "center",
+            });
+            gsap.set(allPaths, { strokeDashoffset: 1 });
+
+            // Native `position: sticky` keeps the panel in view; we scrub the
+            // timeline across the tall track. This avoids GSAP `pin`, which breaks
+            // when an ancestor has `overflow-x: hidden` (it becomes a scroller).
+            const tl = gsap.timeline({
+               scrollTrigger: {
+                  trigger: containerRef.current,
+                  start: "top top",
+                  end: "bottom bottom",
+                  scrub: 1,
+               },
+            });
+
+            // Continuous tracks across the whole scrub.
+            tl.fromTo(
+               headphoneRef.current,
+               { scale: startScale, yPercent: 5, rotate: -1.5 },
+               { scale: endScale, yPercent: -3, rotate: 1.5, ease: "none" },
+               0,
+            );
+            tl.fromTo(
+               ghostRef.current,
+               { xPercent: 4 },
+               { xPercent: -4, ease: "none" },
+               0,
+            );
+
+            // Sequential callout reveals.
+            SPEC_CALLOUTS.forEach((c, i) => {
+               const refs = partsRef.current[c.id];
+               if (!refs) return;
+               const seg = 0.12 + i * 0.2;
+
+               tl.to(
+                  refs.path,
+                  { strokeDashoffset: 0, ease: "none", duration: 0.12 },
+                  seg,
+               );
+               tl.to(
+                  refs.dot,
+                  { scale: 1, ease: "back.out(2)", duration: 0.06 },
+                  seg,
+               );
+               tl.fromTo(
+                  refs.ring,
+                  { scale: 0, opacity: 0.8 },
+                  {
+                     scale: 2.4,
+                     opacity: 0,
+                     ease: "power2.out",
+                     duration: 0.18,
+                  },
+                  seg,
+               );
+               tl.to(
+                  refs.label,
+                  { opacity: 1, y: 0, ease: "power2.out", duration: 0.1 },
+                  seg + 0.05,
+               );
+
+               const counter = { v: 0 };
+               if (refs.number) refs.number.textContent = "0";
+               tl.to(
+                  counter,
+                  {
+                     v: c.value,
+                     duration: 0.1,
+                     ease: "none",
+                     onUpdate: () => {
+                        if (refs.number)
+                           refs.number.textContent = formatValue(counter.v);
+                     },
+                  },
+                  seg + 0.05,
+               );
+            });
+            // Secondary spec ledger — staggered fade-in near end of scrub
+            const secondaryItems = gsap.utils.toArray<HTMLElement>(
+               "[data-spec-secondary]",
+            );
+            if (secondaryItems.length) {
+               gsap.set(secondaryItems, { opacity: 0, y: 8 });
+               tl.to(
+                  secondaryItems,
+                  {
+                     opacity: 1,
+                     y: 0,
+                     stagger: 0.06,
+                     duration: 0.1,
+                     ease: "power2.out",
+                  },
+                  0.85,
+               );
+            }
+
+            // Bottom progress bar spans the ENTIRE timeline (position 0 →
+            // full duration) so it fills linearly with scroll: 0% as the scrub
+            // starts, 100% exactly when the last reveal completes.
+            if (railFillRef.current) {
+               tl.fromTo(
+                  railFillRef.current,
+                  { scaleX: 0 },
+                  { scaleX: 1, ease: "none", duration: tl.duration() },
+                  0,
+               );
+            }
+
+            return () => settleFinalNumbers();
+         };
+
          const mm = gsap.matchMedia();
 
-         // ---- Desktop: pinned, scroll-scrubbed teardown ----
+         // ---- Tablet: pinned, scroll-scrubbed teardown (768px to 1023px) ----
          mm.add(
-            "(min-width: 768px) and (prefers-reduced-motion: no-preference)",
+            "(min-width: 768px) and (max-width: 1023px) and (prefers-reduced-motion: no-preference)",
             () => {
-               gsap.set(allLabels, { opacity: 0, y: 16 });
-               gsap.set(allDots, { scale: 0, transformOrigin: "center" });
-               gsap.set(allRings, {
-                  scale: 0,
-                  opacity: 0,
-                  transformOrigin: "center",
-               });
-               gsap.set(allPaths, { strokeDashoffset: 1 });
+               return setupTeardownTimeline(0.85, 0.92);
+            },
+         );
 
-               // Native `position: sticky` keeps the panel in view; we scrub the
-               // timeline across the tall track. This avoids GSAP `pin`, which breaks
-               // when an ancestor has `overflow-x: hidden` (it becomes a scroller).
-               const tl = gsap.timeline({
-                  scrollTrigger: {
-                     trigger: containerRef.current,
-                     start: "top top",
-                     end: "bottom bottom",
-                     scrub: 1,
-                  },
-               });
-
-               // Continuous tracks across the whole scrub.
-               tl.fromTo(
-                  headphoneRef.current,
-                  { scale: 0.9, yPercent: 5, rotate: -1.5 },
-                  { scale: 1.06, yPercent: -3, rotate: 1.5, ease: "none" },
-                  0,
-               );
-               tl.fromTo(
-                  ghostRef.current,
-                  { xPercent: 4 },
-                  { xPercent: -4, ease: "none" },
-                  0,
-               );
-
-               // Sequential callout reveals.
-               SPEC_CALLOUTS.forEach((c, i) => {
-                  const refs = partsRef.current[c.id];
-                  if (!refs) return;
-                  const seg = 0.12 + i * 0.2;
-
-                  tl.to(
-                     refs.path,
-                     { strokeDashoffset: 0, ease: "none", duration: 0.12 },
-                     seg,
-                  );
-                  tl.to(
-                     refs.dot,
-                     { scale: 1, ease: "back.out(2)", duration: 0.06 },
-                     seg,
-                  );
-                  tl.fromTo(
-                     refs.ring,
-                     { scale: 0, opacity: 0.8 },
-                     {
-                        scale: 2.4,
-                        opacity: 0,
-                        ease: "power2.out",
-                        duration: 0.18,
-                     },
-                     seg,
-                  );
-                  tl.to(
-                     refs.label,
-                     { opacity: 1, y: 0, ease: "power2.out", duration: 0.1 },
-                     seg + 0.05,
-                  );
-
-                  const counter = { v: 0 };
-                  if (refs.number) refs.number.textContent = "0";
-                  tl.to(
-                     counter,
-                     {
-                        v: c.value,
-                        duration: 0.1,
-                        ease: "none",
-                        onUpdate: () => {
-                           if (refs.number)
-                              refs.number.textContent = formatValue(counter.v);
-                        },
-                     },
-                     seg + 0.05,
-                  );
-               });
-               // Secondary spec ledger — staggered fade-in near end of scrub
-               const secondaryItems = gsap.utils.toArray<HTMLElement>(
-                  "[data-spec-secondary]",
-               );
-               if (secondaryItems.length) {
-                  gsap.set(secondaryItems, { opacity: 0, y: 8 });
-                  tl.to(
-                     secondaryItems,
-                     {
-                        opacity: 1,
-                        y: 0,
-                        stagger: 0.06,
-                        duration: 0.1,
-                        ease: "power2.out",
-                     },
-                     0.85,
-                  );
-               }
-
-               // Bottom progress bar spans the ENTIRE timeline (position 0 →
-               // full duration) so it fills linearly with scroll: 0% as the scrub
-               // starts, 100% exactly when the last reveal completes.
-               if (railFillRef.current) {
-                  tl.fromTo(
-                     railFillRef.current,
-                     { scaleX: 0 },
-                     { scaleX: 1, ease: "none", duration: tl.duration() },
-                     0,
-                  );
-               }
-
-               return () => settleFinalNumbers();
+         // ---- Desktop: pinned, scroll-scrubbed teardown (>=1024px) ----
+         mm.add(
+            "(min-width: 1024px) and (prefers-reduced-motion: no-preference)",
+            () => {
+               return setupTeardownTimeline(0.9, 1.06);
             },
          );
 
@@ -337,7 +349,7 @@ export function Specifications() {
 
                <div
                   ref={stageRef}
-                  className="relative z-10 mx-auto mt-6 w-full max-w-[440px] aspect-square md:mt-0 md:mx-0 md:max-w-none md:w-auto md:h-[72%] md:absolute md:top-[54%] md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2"
+                  className="relative z-10 mx-auto mt-6 w-full max-w-[440px] aspect-square md:mt-0 md:mx-0 md:max-w-none md:w-auto md:h-[64%] lg:h-[72%] md:absolute md:top-[62%] lg:top-[54%] md:left-1/2 md:-translate-x-1/2 lg:max-[1375px]:-translate-x-[30%] md:-translate-y-1/2"
                >
                   <div
                      ref={headphoneRef}

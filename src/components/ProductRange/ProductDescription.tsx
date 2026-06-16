@@ -7,7 +7,7 @@ import { TextReveal } from "@/components/ui/TextReveal";
  */
 export function ProductDescription() {
    return (
-      <div className="z-20 relative px-6 md:px-4 text-center mt-8 md:mt-24 mb-6 md:mb-12">
+      <div className="z-20 relative px-6 md:px-4 text-center mt-0 lg:mt-24 mb-6 md:mb-12">
          <TextReveal
             split="words"
             variant="blur"
