@@ -1,13 +1,22 @@
 import { BRAND_NAME } from '@/lib/constants';
+import { HERO_ENTRANCE } from '@/lib/animations';
+import { TextReveal } from '@/components/ui/TextReveal';
 
 /**
  * HeroLogo — Crescent moon SVG icon + "MODEL EARS" brand name.
  * Inline SVG for pixel-perfect rendering at any size.
+ * Act 2 of hero entrance: blur-reveals at 0.3s delay.
  */
 export function HeroLogo() {
   return (
     <div className="w-full flex justify-center items-center pt-10 z-20">
-      <div className="flex items-center gap-4">
+      <TextReveal
+        inView={{ margin: '0px' }}
+        variant="blur"
+        delay={HERO_ENTRANCE.logo}
+        as="div"
+        className="flex items-center gap-4"
+      >
         {/* Crescent moon logo — inline SVG */}
         <svg
           width="16"
@@ -26,7 +35,7 @@ export function HeroLogo() {
         <span className="text-white font-normal text-sm uppercase tracking-[0.15em] font-schein">
           {BRAND_NAME}
         </span>
-      </div>
+      </TextReveal>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { forwardRef } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
+import { TextReveal } from "@/components/ui/TextReveal";
 import { CarouselButton } from "./CarouselButton";
 
 interface CarouselNavProps {
@@ -58,23 +59,13 @@ export const CarouselNav = forwardRef<HTMLDivElement, CarouselNavProps>(
                   >
                      {firstWord}
                   </motion.span>
-                  <AnimatePresence mode="popLayout">
-                     <motion.span
-                        layout
-                        key={suffix}
-                        initial={{
-                           opacity: 0,
-                           filter: "blur(12px)",
-                           scale: 1.05,
-                        }}
-                        animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
-                        exit={{ opacity: 0, filter: "blur(12px)", scale: 0.95 }}
-                        transition={{ duration: 0.7, ease: "easeInOut" }}
-                        className="inline-block whitespace-nowrap"
-                     >
-                        {suffix}
-                     </motion.span>
-                  </AnimatePresence>
+                  <TextReveal
+                     revealKey={suffix}
+                     variant="blur"
+                     className="inline-block whitespace-nowrap"
+                  >
+                     {suffix}
+                  </TextReveal>
                   {/* Diagonal arrow — appears on hover */}
                   <motion.svg
                      layout

@@ -1,9 +1,11 @@
 import { HERO_TITLE_LINE1, HERO_TITLE_LINE2 } from "@/lib/constants";
+import { HERO_ENTRANCE } from "@/lib/animations";
+import { TextReveal } from "@/components/ui/TextReveal";
 
 /**
  * HeroTitle — Large "MODEL XRS" background text.
  * Positioned behind the headphone image (z-index layering).
- * Non-interactive, decorative only.
+ * Act 3 of hero entrance: word-by-word blur reveal at staggered delays.
  */
 export function HeroTitle() {
    return (
@@ -12,9 +14,24 @@ export function HeroTitle() {
             className="text-white text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-normal leading-[0.85] text-center select-none font-schein"
             style={{ letterSpacing: "-0.02em" }}
          >
-            {HERO_TITLE_LINE1}
-            <br />
-            {HERO_TITLE_LINE2}
+            <TextReveal
+               inView
+               variant="blur"
+               delay={HERO_ENTRANCE.titleWord1}
+               as="span"
+               className="block"
+            >
+               {HERO_TITLE_LINE1}
+            </TextReveal>
+            <TextReveal
+               inView={{ margin: '0px' }}
+               variant="blur"
+               delay={HERO_ENTRANCE.titleWord2}
+               as="span"
+               className="block"
+            >
+               {HERO_TITLE_LINE2}
+            </TextReveal>
          </h1>
       </div>
    );
