@@ -71,7 +71,8 @@ export function SmoothScrollProvider({
         duration: 1.2,
         autoRaf: false,
         syncTouch: true,
-        touchMultiplier: 2,
+        syncTouchLerp: 0.075, // Gentler touch deceleration (default 0.1 is snappier)
+        touchMultiplier: 1,   // 1:1 touch mapping — no amplification
       }}
     >
       {children}
